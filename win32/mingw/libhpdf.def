@@ -55,6 +55,7 @@ EXPORTS
  HPDF_Image_GetWidth@4               = HPDF_Image_GetWidth
  HPDF_Image_SetColorMask@28          = HPDF_Image_SetColorMask
  HPDF_Image_SetMaskImage@8           = HPDF_Image_SetMaskImage
+ HPDF_Image_SetMask@8                = HPDF_Image_SetMask
  HPDF_InsertPage@8                   = HPDF_InsertPage
  HPDF_LinkAnnot_SetBorderStyle@16    = HPDF_LinkAnnot_SetBorderStyle
  HPDF_LinkAnnot_SetHighlightMode@8   = HPDF_LinkAnnot_SetHighlightMode
@@ -173,6 +174,7 @@ EXPORTS
  HPDF_Page_TextOut@16                = HPDF_Page_TextOut
  HPDF_Page_TextRect@32               = HPDF_Page_TextRect
  HPDF_Page_TextWidth@8               = HPDF_Page_TextWidth
+ HPDF_Page_WriteComment@8            = HPDF_Page_WriteComment
  HPDF_ReadFromStream@12              = HPDF_ReadFromStream
  HPDF_ResetError@4                   = HPDF_ResetError
  HPDF_ResetStream@4                  = HPDF_ResetStream
