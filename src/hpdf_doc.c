@@ -1885,7 +1885,7 @@ HPDF_SetViewerPreference  (HPDF_Doc     pdf,
     if (ret != HPDF_OK)
         return HPDF_CheckError (&pdf->error);
 
-    pdf->pdf_version = HPDF_VER_16;
+    pdf->pdf_version = HPDF_VER_17;
 
     return HPDF_OK;
 }
