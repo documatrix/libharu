@@ -95,12 +95,15 @@
 /*----------------------------------------------------------------------------*/
 /*------ viewer preferences definitions --------------------------------------*/
 
-#define HPDF_HIDE_TOOLBAR    1
-#define HPDF_HIDE_MENUBAR    2
-#define HPDF_HIDE_WINDOW_UI  4
-#define HPDF_FIT_WINDOW      8
-#define HPDF_CENTER_WINDOW   16
+#define HPDF_HIDE_TOOLBAR         1
+#define HPDF_HIDE_MENUBAR         2
+#define HPDF_HIDE_WINDOW_UI       4
+#define HPDF_FIT_WINDOW           8
+#define HPDF_CENTER_WINDOW        16
 #define HPDF_PRINT_SCALING_NONE   32
+#define HPDF_SIMPLEX              64
+#define HPDF_DUPLEX_FLIP_SHORT    128
+#define HPDF_DUPLEX_FLIP_LONG     256
 
 
 /*---------------------------------------------------------------------------*/

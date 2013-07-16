@@ -327,6 +327,25 @@ HPDF_Catalog_SetViewerPreference  (HPDF_Catalog   catalog,
                 return ret;
     }
 
+    if (value & HPDF_SIMPLEX) {
+        if ((ret = HPDF_Dict_AddName (preferences, "Duplex",
+                "Simplex")) != HPDF_OK)
+            return ret;
+    } else if (value & HPDF_DUPLEX_FLIP_SHORT) {
+        if ((ret = HPDF_Dict_AddName (preferences, "Duplex",
+                "DuplexFlipShortEdge")) != HPDF_OK)
+            return ret;
+    } else if (value & HPDF_DUPLEX_FLIP_LONG) {
+        if ((ret = HPDF_Dict_AddName (preferences, "Duplex",
+                "DuplexFlipLongEdge")) != HPDF_OK)
+            return ret;
+    } else {
+        if ((ret = HPDF_Dict_RemoveElement (preferences, "Duplex")) !=
+                HPDF_OK)
+            if (ret != HPDF_DICT_ITEM_NOT_FOUND)
+                return ret;
+    }
+
     return HPDF_OK;
 }
 
