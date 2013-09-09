@@ -67,6 +67,7 @@ EXPORTS
  HPDF_LoadTTFontFromFile@12          = HPDF_LoadTTFontFromFile
  HPDF_LoadTTFontFromFile2@16         = HPDF_LoadTTFontFromFile2
  HPDF_LoadType1FontFromFile@12       = HPDF_LoadType1FontFromFile
+ HPDF_LoadType1FontFromFile2@12      = HPDF_LoadType1FontFromFile2
  HPDF_New@8                          = HPDF_New
  HPDF_NewDoc@4                       = HPDF_NewDoc
  HPDF_NewEx@20                       = HPDF_NewEx
@@ -171,6 +172,7 @@ EXPORTS
  HPDF_Page_ShowTextNextLine@8        = HPDF_Page_ShowTextNextLine
  HPDF_Page_ShowTextNextLineEx@16     = HPDF_Page_ShowTextNextLineEx
  HPDF_Page_Stroke@4                  = HPDF_Page_Stroke
+ HPDF_Page_TextField@8               = HPDF_Page_TextField
  HPDF_Page_TextOut@16                = HPDF_Page_TextOut
  HPDF_Page_TextRect@32               = HPDF_Page_TextRect
  HPDF_Page_TextWidth@8               = HPDF_Page_TextWidth

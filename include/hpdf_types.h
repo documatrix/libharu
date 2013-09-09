@@ -263,6 +263,16 @@ typedef struct _HPDF_CMYKColor {
 } HPDF_CMYKColor;
 
 /*---------------------------------------------------------------------------*/
+/*----- HPDF_Color struct -----------------------------------------------*/
+
+typedef struct _HPDF_Color {
+    HPDF_ColorSpace cs;
+    HPDF_RGBColor   rgb;
+    HPDF_CMYKColor  cmyk;
+    HPDF_REAL       gray;
+} HPDF_Color;
+
+/*---------------------------------------------------------------------------*/
 /*------ The line cap style -------------------------------------------------*/
 
 typedef enum _HPDF_LineCap {

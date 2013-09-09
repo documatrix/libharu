@@ -126,10 +126,17 @@ HPDF_Type1Font_New  (HPDF_MMgr        mmgr,
 
     fontdef_attr = (HPDF_Type1FontDefAttr)fontdef->attr;
 
-    ret += HPDF_Dict_AddName (font, "Type", "Font");
-    ret += HPDF_Dict_AddName (font, "BaseFont", fontdef->base_font);
-    ret += HPDF_Dict_AddName (font, "Subtype", "Type1");
-
+    if(strncmp (fontdef->base_font, "HPDF_", 5) == 0 && fontdef->is_form_font == HPDF_TRUE)
+    {
+        ret += HPDF_Dict_AddName (font, "Type", "Font");
+        ret += HPDF_Dict_AddName (font, "BaseFont", fontdef->base_font + 5);
+        ret += HPDF_Dict_AddName (font, "Subtype", "TrueType");
+    }
+    else{
+        ret += HPDF_Dict_AddName (font, "Type", "Font");
+        ret += HPDF_Dict_AddName (font, "BaseFont", fontdef->base_font);
+        ret += HPDF_Dict_AddName (font, "Subtype", "Type1");
+    }
     if (!fontdef_attr->is_base14font) {
         if (fontdef->missing_width != 0)
             ret += HPDF_Dict_AddNumber (font, "MissingWidth",
@@ -178,8 +185,16 @@ Type1Font_CreateDescriptor  (HPDF_MMgr  mmgr,
         array = HPDF_Box_Array_New (mmgr, def->font_bbox);
         ret += HPDF_Dict_Add (descriptor, "FontBBox", array);
 
-        ret += HPDF_Dict_AddName (descriptor, "FontName",
-                font_attr->fontdef->base_font);
+        if(strncmp (font_attr->fontdef->base_font, "HPDF_", 5) == 0 && font_attr->fontdef->is_form_font == HPDF_TRUE)
+        {
+            ret += HPDF_Dict_AddName (descriptor, "FontName",
+                    font_attr->fontdef->base_font + 5);
+        }
+        else
+        {
+            ret += HPDF_Dict_AddName (descriptor, "FontName",
+                    font_attr->fontdef->base_font);
+        }
         ret += HPDF_Dict_AddNumber (descriptor, "ItalicAngle",
                 def->italic_angle);
         ret += HPDF_Dict_AddNumber (descriptor, "StemV", def->stemv);
