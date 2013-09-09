@@ -48,6 +48,7 @@ HPDF_Catalog_New  (HPDF_MMgr  mmgr,
 {
     HPDF_Catalog catalog;
     HPDF_STATUS ret = 0;
+    HPDF_CatalogAttr attr;
 
     catalog = HPDF_Dict_New (mmgr);
     if (!catalog)
@@ -61,6 +62,15 @@ HPDF_Catalog_New  (HPDF_MMgr  mmgr,
     /* add requiered elements */
     ret += HPDF_Dict_AddName (catalog, "Type", "Catalog");
     ret += HPDF_Dict_Add (catalog, "Pages", HPDF_Pages_New (mmgr, NULL, xref));
+
+    attr = HPDF_GetMem (mmgr, sizeof(HPDF_CatalogAttr_Rec));
+    if (!attr) {
+        HPDF_Dict_Free (catalog);
+        return NULL;
+    }
+
+    catalog->attr = attr;
+    HPDF_MemSet (attr, 0, sizeof(HPDF_CatalogAttr_Rec));
 
     if (ret != HPDF_OK)
         return NULL;
@@ -402,3 +412,110 @@ HPDF_Catalog_GetViewerPreference  (HPDF_Catalog   catalog)
     return value;
 }
 
+HPDF_Dict
+HPDF_Catalog_GetAcroForm (HPDF_Catalog catalog)
+{
+    HPDF_Dict acroForm;
+
+    if (!catalog)
+        return NULL;
+
+    acroForm = HPDF_Dict_GetItem (catalog, "AcroForm", HPDF_OCLASS_DICT);
+    if (!acroForm)
+    {
+        HPDF_STATUS ret = 0;
+
+        HPDF_Dict form_dict = HPDF_Dict_New (catalog->mmgr);
+        if(!form_dict)
+            return NULL;
+        ret += HPDF_Dict_Add (form_dict, "Fields", HPDF_Array_New (form_dict->mmgr));
+        ret += HPDF_Dict_Add (catalog, "AcroForm", form_dict);
+
+        ret += HPDF_Dict_AddBoolean (form_dict, "NeedAppearances", HPDF_TRUE);
+
+        HPDF_Dict dr = HPDF_Dict_New (catalog->mmgr);
+        if(!dr)
+            return NULL;
+
+        ret += HPDF_Dict_Add (form_dict, "DR", dr);
+        if (ret != HPDF_OK)
+            return NULL;
+
+        acroForm = form_dict;
+    }
+
+    return acroForm;
+}
+
+HPDF_STATUS
+HPDF_Catalog_AddInteractiveField (HPDF_Catalog  catalog,
+                                  HPDF_Dict     field)
+{
+    HPDF_Array fields;
+    HPDF_Dict acroForm = HPDF_Catalog_GetAcroForm (catalog);
+    if(!acroForm)
+        return HPDF_Error_GetCode (catalog->error);
+
+    fields = (HPDF_Array)HPDF_Dict_GetItem (acroForm, "Fields", HPDF_OCLASS_ARRAY);
+
+    return HPDF_Array_Add (fields, field);
+}
+
+const char*
+HPDF_Catalog_GetLocalFontName  (HPDF_Catalog  catalog,
+                                HPDF_Font     font)
+{
+    HPDF_CatalogAttr attr = (HPDF_CatalogAttr)catalog->attr;
+    HPDF_Dict acroForm = HPDF_Catalog_GetAcroForm (catalog);
+    const char *key;
+
+    HPDF_PTRACE((" HPDF_Catalog_GetLocalFontName\n"));
+
+    if(!acroForm)
+        return NULL;
+
+    /*
+     * whether check font-resource exists.  when it does not exists,
+     * create font-resource
+     */
+    if (!attr->fonts) {
+        HPDF_Dict resources;
+        HPDF_Dict fonts;
+
+        resources = HPDF_Dict_GetItem (acroForm, "DR", HPDF_OCLASS_DICT);
+
+        if (!resources)
+            return NULL;
+
+        fonts = HPDF_Dict_New (catalog->mmgr);
+        if (!fonts)
+            return NULL;
+
+        if (HPDF_Dict_Add (resources, "Font", fonts) != HPDF_OK)
+            return NULL;
+
+        attr->fonts = fonts;
+    }
+
+    /* search font-object from font-resource */
+    key = HPDF_Dict_GetKeyByObj (attr->fonts, font);
+    if (!key) {
+        /*
+         * if the font is not resisterd in font-resource, register font to
+         * font-resource.
+         */
+        char fontName[HPDF_LIMIT_MAX_NAME_LEN + 1];
+        char *ptr;
+        char *end_ptr = fontName + HPDF_LIMIT_MAX_NAME_LEN;
+
+        ptr = (char *)HPDF_StrCpy (fontName, "F", end_ptr);
+        HPDF_IToA (ptr, attr->fonts->list->count + 1, end_ptr);
+
+        if (HPDF_Dict_Add (attr->fonts, fontName, font) != HPDF_OK)
+            return NULL;
+
+        key = HPDF_Dict_GetKeyByObj (attr->fonts, font);
+    }
+
+    return key;
+}

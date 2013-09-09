@@ -106,6 +106,7 @@ typedef struct _HPDF_FontDef_Rec {
     HPDF_UINT16   stemh;
     HPDF_UINT16   x_height;
     HPDF_UINT16   cap_height;
+    HPDF_BOOL     is_form_font;
 
     /*  the initial value of descriptor entry is NULL.
      *  when first font-object besed on the fontdef object is created,

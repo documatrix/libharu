@@ -281,6 +281,10 @@ HPDF_LoadType1FontFromFile  (HPDF_Doc     pdf,
                              const char  *afm_file_name,
                              const char  *data_file_name);
 
+HPDF_EXPORT(const char*)
+HPDF_LoadType1FontFromFile2  (HPDF_Doc     pdf,
+                              const char  *afm_file_name,
+                              const char  *font_name);
 
 HPDF_EXPORT(HPDF_FontDef)
 HPDF_GetTTFontDefFromFile (HPDF_Doc     pdf,
@@ -1598,6 +1602,23 @@ HPDF_EXPORT(HPDF_STATUS)
 HPDF_Page_WriteComment (HPDF_Page    page,
                         const char  *text);
 
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_TextField  (HPDF_Page            page,
+                      HPDF_Doc             pdf,
+                      HPDF_REAL            left,
+                      HPDF_REAL            top,
+                      HPDF_REAL            right,
+                      HPDF_REAL            bottom,
+                      const char          *name,
+                      const char          *text,
+                      HPDF_UINT            flag,
+                      HPDF_BOOL            print,
+                      HPDF_UINT            max_len,
+                      HPDF_UINT            alignment,
+                      HPDF_INT             rotation,
+                      HPDF_Font            font,
+                      HPDF_REAL            font_size,
+                      HPDF_Color           color);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

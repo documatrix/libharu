@@ -26,6 +26,12 @@ extern "C" {
 
 typedef HPDF_Dict HPDF_Catalog;
 
+typedef struct _HPDF_CatalogAttr_Rec  *HPDF_CatalogAttr;
+
+typedef struct _HPDF_CatalogAttr_Rec {
+    HPDF_Dict          fonts;
+} HPDF_CatalogAttr_Rec;
+
 HPDF_Catalog
 HPDF_Catalog_New  (HPDF_MMgr  mmgr,
                    HPDF_Xref  xref);

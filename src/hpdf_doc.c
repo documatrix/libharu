@@ -69,6 +69,10 @@ LoadType1FontFromStream (HPDF_Doc     pdf,
                          HPDF_Stream  afmdata,
                          HPDF_Stream  pfmdata);
 
+static const char*
+LoadType1FontFromStream2 (HPDF_Doc     pdf,
+                          HPDF_Stream  afmdata,
+                          const char   *font_name);
 
 static const char*
 LoadTTFontFromStream (HPDF_Doc         pdf,
@@ -1432,6 +1436,41 @@ HPDF_LoadType1FontFromFile  (HPDF_Doc     pdf,
 }
 
 
+/*
+ * Loads a Font without embedding its font data.
+ * If parameter font_name is specified it will be used as the font name.
+ */
+HPDF_EXPORT(const char*)
+HPDF_LoadType1FontFromFile2  (HPDF_Doc     pdf,
+                              const char  *afm_file_name,
+                              const char  *font_name)
+{
+    HPDF_Stream afm;
+    const char *ret;
+
+    HPDF_PTRACE ((" HPDF_LoadType1FontFromFile2\n"));
+
+    if (!HPDF_HasDoc (pdf))
+        return NULL;
+
+    /* create file stream */
+    afm = HPDF_FileReader_New (pdf->mmgr, afm_file_name);
+
+    if (HPDF_Stream_Validate (afm))
+        ret = LoadType1FontFromStream2 (pdf, afm, font_name);
+    else
+        ret = NULL;
+
+    /* destroy file stream */
+    if (afm)
+        HPDF_Stream_Free (afm);
+
+    if (!ret)
+        HPDF_CheckError (&pdf->error);
+
+    return ret;
+}
+
 static const char*
 LoadType1FontFromStream  (HPDF_Doc      pdf,
                           HPDF_Stream   afmdata,
@@ -1448,6 +1487,47 @@ LoadType1FontFromStream  (HPDF_Doc      pdf,
     if (def) {
         HPDF_FontDef  tmpdef = HPDF_Doc_FindFontDef (pdf, def->base_font);
         if (tmpdef) {
+            HPDF_FontDef_Free (def);
+            HPDF_SetError (&pdf->error, HPDF_FONT_EXISTS, 0);
+            return NULL;
+        }
+
+        if (HPDF_List_Add (pdf->fontdef_list, def) != HPDF_OK) {
+            HPDF_FontDef_Free (def);
+            return NULL;
+        }
+        return def->base_font;
+    }
+    return NULL;
+}
+
+
+static const char*
+LoadType1FontFromStream2  (HPDF_Doc      pdf,
+                           HPDF_Stream   afmdata,
+                           const char   *font_name)
+{
+    HPDF_FontDef def;
+
+    HPDF_PTRACE ((" HPDF_LoadType1FontFromStream2\n"));
+
+    if (!HPDF_HasDoc (pdf))
+        return NULL;
+
+    def = HPDF_Type1FontDef_Load (pdf->mmgr, afmdata, NULL);
+
+    if (def) {
+        char newname[] = "HPDF_";
+        if(font_name)
+            strcat(newname, font_name);
+        else
+            strcat(newname, def->base_font);
+
+        HPDF_StrCpy (def->base_font, newname, def->base_font + HPDF_LIMIT_MAX_NAME_LEN);
+        def->is_form_font = HPDF_TRUE;
+
+        HPDF_FontDef tmpdef = HPDF_Doc_FindFontDef (pdf, def->base_font);
+        if(tmpdef) {
             HPDF_FontDef_Free (def);
             HPDF_SetError (&pdf->error, HPDF_FONT_EXISTS, 0);
             return NULL;
