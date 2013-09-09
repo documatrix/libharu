@@ -546,6 +546,20 @@
 #define   HPDF_GMODE_INLINE_IMAGE           0x0020
 #define   HPDF_GMODE_EXTERNAL_OBJECT        0x0040
 
+/*----------------------------------------------------------------------------*/
+/*------ Flags for interactive fields ----------------------------------------*/
+                                                 /* BIT POSITION */
+#define HPDF_FIELD_READONLY            1           /*    1    */
+#define HPDF_FIELD_REQUIRED            2           /*    2    */
+#define HPDF_FIELD_NOEXPORT            4           /*    3    */
+#define HPDF_FIELD_MULTILINE           4096        /*    13   */
+#define HPDF_FIELD_PASSWORD            8192        /*    14   */
+#define HPDF_FIELD_FILESELECT          1048576     /*    21   */
+#define HPDF_FIELD_DONOTSPELLCHECK     4194304     /*    23   */
+#define HPDF_FIELD_DONOTSCROLL         8388608     /*    24   */
+#define HPDF_FIELD_COMB                16777216    /*    25   */
+#define HPDF_FIELD_RICHTEXT            33554432    /*    26   */
+
 
 /*----------------------------------------------------------------------------*/
 

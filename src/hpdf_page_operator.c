@@ -2908,3 +2908,212 @@ HPDF_Page_WriteComment  (HPDF_Page    page,
         return HPDF_CheckError (page->error);
     return HPDF_OK;
 }
+
+/*
+ * Inserts a form text field.
+ * Parameter:
+ * page - The Page on which the text field should be inserted
+ * pdf - The PDF Document
+ * left, top, right, bottom - The coordinates of the text field
+ * name - The name of the text field
+ * text - The text value of the text field
+ * flag - A flag specifying various characteristics of the field( One or more of the HPDF_FIELD_* variables or'ed together )
+ * print - If set, the text field will be printed when the page gets printed
+ * max_len - The maximum number of characters
+ * alignment - The text alignment ( 0 - Left-justified, 1 - Centered, 2 - Right-justified )
+ * rotation - The rotation
+ * font - The text fields font
+ * font_size - The font_size
+ * color - The text color
+ */
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_TextField  (HPDF_Page      page,
+                      HPDF_Doc       pdf,
+                      HPDF_REAL      left,
+                      HPDF_REAL      top,
+                      HPDF_REAL      right,
+                      HPDF_REAL      bottom,
+                      const char     *name,
+                      const char     *text,
+                      HPDF_UINT      flag,
+                      HPDF_BOOL      print,
+                      HPDF_UINT      max_len,
+                      HPDF_UINT      alignment,
+                      HPDF_INT       rotation,
+                      HPDF_Font      font,
+                      HPDF_REAL      font_size,
+                      HPDF_Color     color)
+{
+    HPDF_Dict textField;
+    HPDF_STATUS ret;
+
+    HPDF_PTRACE((" HPDF_Page_TextField\n"));
+
+    textField = HPDF_Dict_New (page->mmgr);
+    if (!textField)
+        return HPDF_CheckError (page->error);
+
+    if ((ret = HPDF_Xref_Add (pdf->xref, textField)) != HPDF_OK)
+        return ret;
+
+    ret += HPDF_Dict_AddName (textField, "Type", "Annot");
+    ret += HPDF_Dict_AddName (textField, "Subtype", "Widget");
+
+    if (print){
+        ret += HPDF_Dict_AddNumber (textField, "F", 4);
+    } else {
+        ret += HPDF_Dict_AddNumber (textField, "F", 0);
+    }
+
+    /* Rect */
+    HPDF_Array rectArray = HPDF_Array_New (page->mmgr);
+    if (!rectArray)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddReal (rectArray, left);
+    ret += HPDF_Array_AddReal (rectArray, bottom);
+    ret += HPDF_Array_AddReal (rectArray, right);
+    ret += HPDF_Array_AddReal (rectArray, top);
+
+    ret += HPDF_Dict_Add (textField, "Rect", rectArray);
+
+    /* FT */
+    ret += HPDF_Dict_AddName (textField, "FT", "Tx");
+
+    /* T */
+    HPDF_String textFieldName = HPDF_String_New (page->mmgr, name, NULL);
+    if (!textFieldName)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (textField, "T", textFieldName);
+
+    /* V */
+    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, text, NULL);
+    if (!textFieldValue)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (textField, "V", textFieldValue);
+
+    /* DR */
+    HPDF_Dict resource = HPDF_Dict_New (page->mmgr);
+    if (!resource)
+        return HPDF_CheckError (page->error);
+    HPDF_Dict f = HPDF_Dict_New (page->mmgr);
+    if (!f)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (f, HPDF_Catalog_GetLocalFontName (pdf->catalog, font), font);
+    ret += HPDF_Dict_Add (resource, "Font", f);
+    ret += HPDF_Dict_Add (textField, "DR", resource);
+
+    /* DA */
+    char buf[HPDF_TMP_BUF_SIZ];
+    char *pbuf = buf;
+    char *eptr = buf + HPDF_TMP_BUF_SIZ - 1;
+    HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
+
+    if (color.cs == HPDF_CS_DEVICE_GRAY)
+    {
+        /* Gray Color Space */
+        pbuf = HPDF_FToA (pbuf, color.gray, eptr);
+        pbuf = HPDF_StrCpy (pbuf, " g", eptr);
+    }
+    else if (color.cs == HPDF_CS_DEVICE_RGB)
+    {
+        /* RGB Color Space */
+        pbuf = HPDF_FToA (pbuf, color.rgb.r, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.rgb.g, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.rgb.b, eptr);
+        pbuf = HPDF_StrCpy (pbuf, " rg", eptr);
+    }
+    else if (color.cs == HPDF_CS_DEVICE_CMYK)
+    {
+        /* CMYK Color Space */
+        pbuf = HPDF_FToA (pbuf, color.cmyk.c, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.m, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.y, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.k, eptr);
+        pbuf = HPDF_StrCpy (pbuf, " k", eptr);
+    }
+
+    pbuf = HPDF_StrCpy (pbuf, " /", eptr);
+    pbuf = HPDF_StrCpy (pbuf, HPDF_Catalog_GetLocalFontName (pdf->catalog, font), eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, font_size, eptr);
+    pbuf = HPDF_StrCpy (pbuf, " Tf", eptr);
+
+    HPDF_String daValue = HPDF_String_New(page->mmgr, buf, NULL);
+    if (!daValue)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (textField, "DA", daValue);
+
+    /* MK */
+    if (rotation && rotation != 0 && (rotation % 90) == 0)
+    {
+        HPDF_Dict mk = HPDF_Dict_New (page->mmgr);
+        if (!mk)
+            return HPDF_CheckError (page->error);
+        ret += HPDF_Dict_AddNumber (mk, "R", rotation);
+        ret += HPDF_Dict_Add (textField, "MK", mk);
+    }
+
+    /* ALIGNMENT */
+    if (alignment > 0 && alignment <= 2)
+    {
+        ret += HPDF_Dict_AddNumber (textField, "Q", alignment);
+    }
+
+    /* FF */
+    if (flag > 0)
+        ret += HPDF_Dict_AddNumber (textField, "Ff", flag);
+
+    /* MaxLen */
+    if (max_len > 0)
+        ret += HPDF_Dict_AddNumber (textField, "MaxLen", max_len);
+
+    /* AP - APPEARANCE DICTIONARY */
+    HPDF_Dict ap = HPDF_Dict_New (page->mmgr);
+    if (!ap)
+        return HPDF_CheckError (page->error);
+    HPDF_Dict ap_stream = HPDF_DictStream_New (page->mmgr, pdf->xref);
+    if (!ap_stream)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (ap, "N", ap_stream);
+
+    ret += HPDF_Dict_Add (textField, "AP", ap);
+
+    ret += HPDF_Dict_AddName (ap_stream, "Type", "XObject");
+    ret += HPDF_Dict_AddName (ap_stream, "Subtype", "Form");
+
+    /* BBOX */
+    HPDF_Array bbox = HPDF_Array_New (page->mmgr);
+    if (!bbox)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddReal (bbox, 0);
+    ret += HPDF_Array_AddReal (bbox, 0);
+    ret += HPDF_Array_AddReal (bbox, right - left);
+    ret += HPDF_Array_AddReal (bbox, top - bottom);
+    ret += HPDF_Dict_Add (ap_stream, "BBox", bbox);
+
+    /* RESOURCES */
+    HPDF_Dict resource2 = HPDF_Dict_New (page->mmgr);
+    if (!resource2)
+        return HPDF_CheckError (page->error);
+    HPDF_Dict font2 = HPDF_Dict_New (page->mmgr);
+    if (!font2)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (font2, HPDF_Catalog_GetLocalFontName (pdf->catalog, font), font);
+    ret += HPDF_Dict_Add (resource2, "Font", font2);
+    ret += HPDF_Dict_Add (ap_stream, "Resources", resource2);
+
+    /* STREAM */
+    ret += HPDF_Stream_WriteStr (ap_stream->stream, "/Tx BMC\n");
+    ret += HPDF_Stream_WriteStr (ap_stream->stream, "EMC\n");
+
+    ret += HPDF_Page_CreateTextFieldAnnotation (page, textField);
+
+    ret += HPDF_Catalog_AddInteractiveField (pdf->catalog, textField);
+
+    return ret;
+}
