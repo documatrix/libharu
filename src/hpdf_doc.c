@@ -1447,7 +1447,7 @@ HPDF_LoadType1FontFromFile2  (HPDF_Doc     pdf,
     HPDF_Stream afm;
     const char *ret;
 
-    HPDF_PTRACE ((" HPDF_LoadType1FontFromFile\n"));
+    HPDF_PTRACE ((" HPDF_LoadType1FontFromFile2\n"));
 
     if (!HPDF_HasDoc (pdf))
         return NULL;
