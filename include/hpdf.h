@@ -402,6 +402,10 @@ HPDF_EXPORT(HPDF_Encoder)
 HPDF_GetEncoder  (HPDF_Doc     pdf,
                   const char  *encoding_name);
 
+HPDF_EXPORT(HPDF_Encoder)
+HPDF_GetEncoder2  (HPDF_Doc     pdf,
+                   const char  *encoding_name,
+                   const char  *base_encoding_name);
 
 HPDF_EXPORT(HPDF_Encoder)
 HPDF_GetCurrentEncoder  (HPDF_Doc   pdf);

@@ -2474,26 +2474,34 @@ HPDF_BasicEncoder_Write  (HPDF_Encoder  encoder,
         ret = HPDF_Stream_WriteStr (out, "/Differences [");
         if (ret != HPDF_OK)
             return ret;
+        if ( !attr->differences_str )
+        {
+          for (i = attr->first_char; i <= attr->last_char; i++) {
+              if (attr->differences[i] == 1) {
+                  char tmp[HPDF_TEXT_DEFAULT_LEN];
+                  char* ptmp = tmp;
+                  const char* char_name =
+                      HPDF_UnicodeToGryphName (attr->unicode_map[i]);
 
-        for (i = attr->first_char; i <= attr->last_char; i++) {
-            if (attr->differences[i] == 1) {
-                char tmp[HPDF_TEXT_DEFAULT_LEN];
-                char* ptmp = tmp;
-                const char* char_name =
-                    HPDF_UnicodeToGryphName (attr->unicode_map[i]);
+                  ptmp = HPDF_IToA (ptmp, i, tmp + HPDF_TEXT_DEFAULT_LEN - 1);
+                  *ptmp++ = ' ';
+                  *ptmp++ = '/';
+                  ptmp = (char *)HPDF_StrCpy (ptmp, char_name, tmp +
+                          HPDF_TEXT_DEFAULT_LEN - 1);
+                  *ptmp++ = ' ';
+                  *ptmp = 0;
 
-                ptmp = HPDF_IToA (ptmp, i, tmp + HPDF_TEXT_DEFAULT_LEN - 1);
-                *ptmp++ = ' ';
-                *ptmp++ = '/';
-                ptmp = (char *)HPDF_StrCpy (ptmp, char_name, tmp +
-                        HPDF_TEXT_DEFAULT_LEN - 1);
-                *ptmp++ = ' ';
-                *ptmp = 0;
-
-                ret = HPDF_Stream_WriteStr (out, tmp);
-                if (ret != HPDF_OK)
-                    return ret;
-            }
+                  ret = HPDF_Stream_WriteStr (out, tmp);
+                  if (ret != HPDF_OK)
+                      return ret;
+              }
+          }
+        }
+        else
+        {
+          ret = HPDF_Stream_WriteStr (out, attr->differences_str);
+          if (ret != HPDF_OK)
+              return ret;
         }
 
         ret = HPDF_Stream_WriteStr (out, "]\012>>\012");
