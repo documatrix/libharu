@@ -36,6 +36,7 @@ EXPORTS
  HPDF_GetCurrentEncoder@4            = HPDF_GetCurrentEncoder
  HPDF_GetCurrentPage@4               = HPDF_GetCurrentPage
  HPDF_GetEncoder@8                   = HPDF_GetEncoder
+ HPDF_GetEncoder2@8                  = HPDF_GetEncoder2
  HPDF_GetError@4                     = HPDF_GetError
  HPDF_GetErrorDetail@4               = HPDF_GetErrorDetail
  HPDF_GetFont@12                     = HPDF_GetFont

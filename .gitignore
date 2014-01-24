@@ -41,3 +41,4 @@ CPackSourceConfig.cmake
 cmake_install.cmake
 depcomp
 *.dll
+*~
