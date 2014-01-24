@@ -1208,6 +1208,41 @@ HPDF_GetEncoder  (HPDF_Doc         pdf,
     return encoder;
 }
 
+HPDF_EXPORT(HPDF_Encoder)
+HPDF_GetEncoder2  (HPDF_Doc         pdf,
+                   const char      *encoding_name,
+                   const char      *base_encoding_name)
+{
+    HPDF_Encoder encoder;
+    HPDF_STATUS ret;
+
+    HPDF_PTRACE ((" HPDF_GetEncoder\n"));
+
+    if (!HPDF_HasDoc (pdf))
+        return NULL;
+
+    encoder = HPDF_Doc_FindEncoder (pdf, encoding_name);
+
+    if (!encoder) {
+        encoder = HPDF_BasicEncoder_New (pdf->mmgr, base_encoding_name);
+
+        if (!encoder) {
+            HPDF_CheckError (&pdf->error);
+            return NULL;
+        }
+        char *eptr;
+        eptr = encoder->name + HPDF_LIMIT_MAX_NAME_LEN;
+        HPDF_StrCpy (encoder->name, encoding_name, eptr);
+
+        if ((ret = HPDF_List_Add (pdf->encoder_list, encoder)) != HPDF_OK) {
+            HPDF_Encoder_Free (encoder);
+            HPDF_RaiseError (&pdf->error, ret, 0);
+            return NULL;
+        }
+    }
+
+    return encoder;
+}
 
 HPDF_EXPORT(HPDF_Encoder)
 HPDF_GetCurrentEncoder  (HPDF_Doc    pdf)

@@ -176,6 +176,7 @@ typedef struct  _HPDF_BasicEncoderAttr_Rec {
       HPDF_UNICODE        unicode_map[256];
       HPDF_BOOL           has_differences;
       HPDF_BYTE           differences[256];
+      const char          *differences_str;
 } HPDF_BasicEncoderAttr_Rec;
 
 
