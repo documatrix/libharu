@@ -251,6 +251,10 @@ LoadAfm (HPDF_FontDef  fontdef,
 
         /* C default character code. */
         s = GetKeyword (buf, buf2, HPDF_LIMIT_MAX_NAME_LEN + 1);
+        if (HPDF_StrCmp (buf2, "EndCharMetrics") == 0) {
+            attr->widths_count = i;
+            break;
+        } else
         if (HPDF_StrCmp (buf2, "CX") == 0) {
             /* not suppoted yet. */
             return HPDF_SetError (fontdef->error,
