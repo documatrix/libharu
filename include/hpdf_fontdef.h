@@ -164,7 +164,8 @@ HPDF_Type1FontDef_New  (HPDF_MMgr  mmgr);
 HPDF_FontDef
 HPDF_Type1FontDef_Load  (HPDF_MMgr         mmgr,
                          HPDF_Stream       afm,
-                         HPDF_Stream       font_data);
+                         HPDF_Stream       font_data,
+                         HPDF_BOOL         native);
 
 
 HPDF_FontDef
