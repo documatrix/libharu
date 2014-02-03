@@ -34,7 +34,8 @@ GetKeyword  (const char  *src,
 
 static HPDF_STATUS
 LoadAfm (HPDF_FontDef  fontdef,
-         HPDF_Stream   stream);
+         HPDF_Stream   stream,
+         HPDF_BOOL     native);
 
 
 static HPDF_STATUS
@@ -125,7 +126,8 @@ GetKeyword  (const char  *src,
 
 static HPDF_STATUS
 LoadAfm (HPDF_FontDef  fontdef,
-         HPDF_Stream   stream)
+         HPDF_Stream   stream,
+         HPDF_BOOL     native)
 {
     HPDF_Type1FontDefAttr attr = (HPDF_Type1FontDefAttr)fontdef->attr;
     char buf[HPDF_TMP_BUF_SIZ];
@@ -244,6 +246,7 @@ LoadAfm (HPDF_FontDef  fontdef,
     for (i = 0; i < attr->widths_count; i++, cdata++) {
         const char *s;
         char buf2[HPDF_LIMIT_MAX_NAME_LEN + 1];
+        HPDF_INT16 unicode = 0;
 
         len = HPDF_TMP_BUF_SIZ;
         if ((ret = HPDF_Stream_ReadLn (stream, buf, &len)) != HPDF_OK)
@@ -261,6 +264,7 @@ LoadAfm (HPDF_FontDef  fontdef,
                     HPDF_INVALID_CHAR_MATRICS_DATA, 0);
         } else
         if (HPDF_StrCmp (buf2, "C") == 0) {
+            unicode = (HPDF_INT16)HPDF_AToI (s);
             s += 2;
 
             s = GetKeyword (s, buf2, HPDF_LIMIT_MAX_NAME_LEN + 1);
@@ -294,7 +298,14 @@ LoadAfm (HPDF_FontDef  fontdef,
 
         GetKeyword (s, buf2, HPDF_LIMIT_MAX_NAME_LEN + 1);
 
-        cdata->unicode = HPDF_GryphNameToUnicode (buf2);
+        if( native )
+        {
+          cdata->unicode = unicode;
+        }
+        else
+        {
+          cdata->unicode = HPDF_GryphNameToUnicode (buf2);
+        }
     }
 
     return HPDF_OK;
@@ -384,7 +395,8 @@ LoadFontData (HPDF_FontDef  fontdef,
 HPDF_FontDef
 HPDF_Type1FontDef_Load  (HPDF_MMgr         mmgr,
                          HPDF_Stream       afm,
-                         HPDF_Stream       font_data)
+                         HPDF_Stream       font_data,
+                         HPDF_BOOL         native)
 {
     HPDF_FontDef fontdef;
     HPDF_STATUS ret;
@@ -399,7 +411,7 @@ HPDF_Type1FontDef_Load  (HPDF_MMgr         mmgr,
     if (!fontdef)
         return NULL;
 
-    ret = LoadAfm (fontdef, afm);
+    ret = LoadAfm (fontdef, afm, native);
     if (ret != HPDF_OK) {
         HPDF_FontDef_Free (fontdef);
         return NULL;
