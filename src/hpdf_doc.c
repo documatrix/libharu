@@ -67,7 +67,8 @@ InternalSaveToStream  (HPDF_Doc      pdf,
 static const char*
 LoadType1FontFromStream (HPDF_Doc     pdf,
                          HPDF_Stream  afmdata,
-                         HPDF_Stream  pfmdata);
+                         HPDF_Stream  pfmdata,
+                         HPDF_BOOL    native);
 
 static const char*
 LoadType1FontFromStream2 (HPDF_Doc     pdf,
@@ -1453,7 +1454,7 @@ HPDF_LoadType1FontFromFile  (HPDF_Doc     pdf,
     if (HPDF_Stream_Validate (afm) &&
             (!data_file_name || HPDF_Stream_Validate (pfm))) {
 
-        ret = LoadType1FontFromStream (pdf, afm, pfm);
+        ret = LoadType1FontFromStream (pdf, afm, pfm, HPDF_FALSE);
     } else
         ret = NULL;
 
@@ -1506,10 +1507,51 @@ HPDF_LoadType1FontFromFile2  (HPDF_Doc     pdf,
     return ret;
 }
 
+HPDF_EXPORT(const char*)
+HPDF_LoadType1FontFromFileNative  (HPDF_Doc     pdf,
+                                   const char  *afm_file_name,
+                                   const char  *data_file_name)
+{
+    HPDF_Stream afm;
+    HPDF_Stream pfm = NULL;
+    const char *ret;
+
+    HPDF_PTRACE ((" HPDF_LoadType1FontFromFileNative\n"));
+
+    if (!HPDF_HasDoc (pdf))
+        return NULL;
+
+    /* create file stream */
+    afm = HPDF_FileReader_New (pdf->mmgr, afm_file_name);
+
+    if (data_file_name)
+        pfm = HPDF_FileReader_New (pdf->mmgr, data_file_name);
+
+    if (HPDF_Stream_Validate (afm) &&
+            (!data_file_name || HPDF_Stream_Validate (pfm))) {
+
+        ret = LoadType1FontFromStream (pdf, afm, pfm, HPDF_TRUE);
+    } else
+        ret = NULL;
+
+    /* destroy file stream */
+    if (afm)
+        HPDF_Stream_Free (afm);
+
+    if (pfm)
+        HPDF_Stream_Free (pfm);
+
+    if (!ret)
+        HPDF_CheckError (&pdf->error);
+
+    return ret;
+}
+
 static const char*
 LoadType1FontFromStream  (HPDF_Doc      pdf,
                           HPDF_Stream   afmdata,
-                          HPDF_Stream   pfmdata)
+                          HPDF_Stream   pfmdata,
+                          HPDF_BOOL     native)
 {
     HPDF_FontDef def;
 
@@ -1518,7 +1560,7 @@ LoadType1FontFromStream  (HPDF_Doc      pdf,
     if (!HPDF_HasDoc (pdf))
         return NULL;
 
-    def = HPDF_Type1FontDef_Load (pdf->mmgr, afmdata, pfmdata);
+    def = HPDF_Type1FontDef_Load (pdf->mmgr, afmdata, pfmdata, native);
     if (def) {
         HPDF_FontDef  tmpdef = HPDF_Doc_FindFontDef (pdf, def->base_font);
         if (tmpdef) {
@@ -1549,7 +1591,7 @@ LoadType1FontFromStream2  (HPDF_Doc      pdf,
     if (!HPDF_HasDoc (pdf))
         return NULL;
 
-    def = HPDF_Type1FontDef_Load (pdf->mmgr, afmdata, NULL);
+    def = HPDF_Type1FontDef_Load (pdf->mmgr, afmdata, NULL, HPDF_FALSE);
 
     if (def) {
         char newname[] = "HPDF_";

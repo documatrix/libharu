@@ -69,6 +69,7 @@ EXPORTS
  HPDF_LoadTTFontFromFile2@16         = HPDF_LoadTTFontFromFile2
  HPDF_LoadType1FontFromFile@12       = HPDF_LoadType1FontFromFile
  HPDF_LoadType1FontFromFile2@12      = HPDF_LoadType1FontFromFile2
+ HPDF_LoadType1FontFromFileNative@12 = HPDF_LoadType1FontFromFileNative
  HPDF_New@8                          = HPDF_New
  HPDF_NewDoc@4                       = HPDF_NewDoc
  HPDF_NewEx@20                       = HPDF_NewEx

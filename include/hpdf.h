@@ -286,6 +286,11 @@ HPDF_LoadType1FontFromFile2  (HPDF_Doc     pdf,
                               const char  *afm_file_name,
                               const char  *font_name);
 
+HPDF_EXPORT(const char*)
+HPDF_LoadType1FontFromFileNative (HPDF_Doc     pdf,
+                                  const char  *afm_file_name,
+                                  const char  *data_file_name);
+
 HPDF_EXPORT(HPDF_FontDef)
 HPDF_GetTTFontDefFromFile (HPDF_Doc     pdf,
                            const char  *file_name,
