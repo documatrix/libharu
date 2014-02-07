@@ -1515,7 +1515,7 @@ HPDF_LoadType1FontFromFileNative  (HPDF_Doc     pdf,
     HPDF_Stream pfm = NULL;
     const char *ret;
 
-    HPDF_PTRACE ((" HPDF_LoadType1FontFromFile\n"));
+    HPDF_PTRACE ((" HPDF_LoadType1FontFromFileNative\n"));
 
     if (!HPDF_HasDoc (pdf))
         return NULL;
