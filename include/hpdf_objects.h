@@ -249,6 +249,7 @@ typedef struct _HPDF_String_Rec {
     HPDF_Encoder     encoder;
     HPDF_BYTE        *value;
     HPDF_UINT        len;
+    HPDF_UINT16      unicode_len;
 } HPDF_String_Rec;
 
 
