@@ -44,6 +44,7 @@ HPDF_String_New  (HPDF_MMgr        mmgr,
         obj->encoder = encoder;
         obj->value = NULL;
         obj->len = 0;
+        obj->unicode_len = 0;
 
         if (HPDF_String_SetValue (obj, value) != HPDF_OK) {
             HPDF_FreeMem (obj->mmgr, obj);
@@ -54,6 +55,36 @@ HPDF_String_New  (HPDF_MMgr        mmgr,
     return obj;
 }
 
+HPDF_String
+HPDF_String_New_Unicode  (HPDF_MMgr        mmgr,
+                          const char      *value,
+                          HPDF_UINT16      unicode_len)
+{
+    HPDF_String obj;
+
+    HPDF_PTRACE((" HPDF_String_New_Unicode\n"));
+
+    obj = (HPDF_String)HPDF_GetMem (mmgr, sizeof(HPDF_String_Rec));
+    if (obj) {
+        HPDF_MemSet (&obj->header, 0, sizeof(HPDF_Obj_Header));
+        obj->header.obj_class = HPDF_OCLASS_STRING;
+
+        obj->mmgr = mmgr;
+        obj->error = mmgr->error;
+        obj->encoder = NULL;
+        obj->value = NULL;
+        obj->len = 0;
+        obj->unicode_len = unicode_len;
+
+        obj->value = HPDF_GetMem (obj->mmgr, unicode_len + 1);
+        if (!obj->value)
+            return HPDF_Error_GetCode (obj->error);
+
+        HPDF_MemCpy ((char *)obj->value, value, unicode_len);
+    }
+
+    return obj;
+}
 
 HPDF_STATUS
 HPDF_String_SetValue  (HPDF_String      obj,
@@ -113,6 +144,19 @@ HPDF_String_Write  (HPDF_String   obj,
 
     if (e)
         HPDF_Encrypt_Reset (e);
+
+    if (obj->unicode_len > 0) {
+        if ((ret = HPDF_Stream_WriteChar (stream, '<')) != HPDF_OK)
+            return ret;
+
+        if ((ret = HPDF_Stream_WriteBinary (stream, UNICODE_HEADER, 2, e)) != HPDF_OK)
+            return ret;
+
+        if ((ret = HPDF_Stream_WriteBinary (stream, obj->value, obj->unicode_len, e)) != HPDF_OK)
+            return ret;
+
+        return HPDF_Stream_WriteChar (stream, '>');
+    }
 
     if (obj->encoder == NULL) {
         if (e) {

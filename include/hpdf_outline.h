@@ -38,7 +38,8 @@ HPDF_Outline_New  (HPDF_MMgr          mmgr,
                    HPDF_Outline       parent,
                    const char   *title,
                    HPDF_Encoder       encoder,
-                   HPDF_Xref          xref);
+                   HPDF_Xref          xref,
+                   HPDF_UINT16        unicode_len);
 
 
 HPDF_Outline

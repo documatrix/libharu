@@ -341,7 +341,8 @@ HPDF_EXPORT(HPDF_Outline)
 HPDF_CreateOutline  (HPDF_Doc       pdf,
                      HPDF_Outline   parent,
                      const char    *title,
-                     HPDF_Encoder   encoder);
+                     HPDF_Encoder   encoder,
+                     HPDF_UINT16    unicode_len);
 
 
 HPDF_EXPORT(HPDF_STATUS)

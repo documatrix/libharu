@@ -2215,7 +2215,8 @@ HPDF_EXPORT(HPDF_Outline)
 HPDF_CreateOutline  (HPDF_Doc       pdf,
                      HPDF_Outline   parent,
                      const char    *title,
-                     HPDF_Encoder   encoder)
+                     HPDF_Encoder   encoder,
+                     HPDF_UINT16    unicode_len)
 {
     HPDF_Outline outline;
 
@@ -2250,7 +2251,7 @@ HPDF_CreateOutline  (HPDF_Doc       pdf,
         return NULL;
     }
 
-    outline = HPDF_Outline_New (pdf->mmgr, parent, title, encoder, pdf->xref);
+    outline = HPDF_Outline_New (pdf->mmgr, parent, title, encoder, pdf->xref, unicode_len);
     if (!outline)
         HPDF_CheckError (&pdf->error);
 
