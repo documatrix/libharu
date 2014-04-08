@@ -83,7 +83,8 @@ HPDF_Outline_New  (HPDF_MMgr          mmgr,
                    HPDF_Outline       parent,
                    const char   *title,
                    HPDF_Encoder       encoder,
-                   HPDF_Xref          xref)
+                   HPDF_Xref          xref,
+                   HPDF_UINT16        unicode_len)
 {
     HPDF_Outline outline;
     HPDF_String s;
@@ -104,7 +105,11 @@ HPDF_Outline_New  (HPDF_MMgr          mmgr,
     if (HPDF_Xref_Add (xref, outline) != HPDF_OK)
         return NULL;
 
-    s = HPDF_String_New (mmgr, title, encoder);
+    if(unicode_len > 0)
+        s = HPDF_String_New_Unicode (mmgr, title, unicode_len);
+    else
+        s = HPDF_String_New (mmgr, title, encoder);
+
     if (!s)
         return NULL;
     else

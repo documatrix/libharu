@@ -108,7 +108,7 @@ HPDF_Destination_SetXYZ  (HPDF_Destination  dst,
     if (!HPDF_Destination_Validate (dst))
         return HPDF_INVALID_DESTINATION;
 
-    if (left < 0 || top < 0 || zoom < 0.08 || zoom > 32)
+    if (left < 0 || top < 0 || zoom < 0 || zoom > 32)
         return HPDF_RaiseError (dst->error, HPDF_INVALID_PARAMETER, 0);
 
 
