@@ -62,7 +62,7 @@ HPDF_String_New_Unicode  (HPDF_MMgr        mmgr,
 {
     HPDF_String obj;
 
-    HPDF_PTRACE((" HPDF_String_New\n"));
+    HPDF_PTRACE((" HPDF_String_New_Unicode\n"));
 
     obj = (HPDF_String)HPDF_GetMem (mmgr, sizeof(HPDF_String_Rec));
     if (obj) {
