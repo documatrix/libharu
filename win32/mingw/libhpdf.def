@@ -75,6 +75,7 @@ EXPORTS
  HPDF_NewEx@20                       = HPDF_NewEx
  HPDF_Outline_SetDestination@8       = HPDF_Outline_SetDestination
  HPDF_Outline_SetOpened@8            = HPDF_Outline_SetOpened
+ HPDF_Outline_GetParent@8            = HPDF_Outline_GetParent
  HPDF_Page_Arc@24                    = HPDF_Page_Arc
  HPDF_Page_BeginText@4               = HPDF_Page_BeginText
  HPDF_Page_Circle@16                 = HPDF_Page_Circle
