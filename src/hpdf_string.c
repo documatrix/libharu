@@ -78,9 +78,9 @@ HPDF_String_New_Unicode  (HPDF_MMgr        mmgr,
 
         obj->value = HPDF_GetMem (obj->mmgr, unicode_len + 1);
         if (!obj->value)
-            return HPDF_Error_GetCode (obj->error);
+            return NULL;
 
-        HPDF_MemCpy ((char *)obj->value, value, unicode_len);
+        HPDF_MemCpy (obj->value, (HPDF_BYTE*)value, unicode_len);
     }
 
     return obj;
