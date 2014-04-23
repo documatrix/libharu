@@ -259,6 +259,10 @@ HPDF_String_New  (HPDF_MMgr        mmgr,
                   const char  *value,
                   HPDF_Encoder     encoder);
 
+HPDF_String
+HPDF_String_New_Unicode  (HPDF_MMgr        mmgr,
+                          const char      *value,
+                          HPDF_UINT16      unicode_len);
 
 HPDF_STATUS
 HPDF_String_SetValue  (HPDF_String      obj,
