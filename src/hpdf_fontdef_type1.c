@@ -150,6 +150,9 @@ LoadAfm (HPDF_FontDef  fontdef,
     if (HPDF_StrCmp (keyword, "StartFontMetrics") != 0)
         return HPDF_INVALID_AFM_HEADER;
 
+    if (native)
+        fontdef->flags = HPDF_FONT_SYMBOLIC;
+
     /* Global Font Information */
 
     for (;;) {
