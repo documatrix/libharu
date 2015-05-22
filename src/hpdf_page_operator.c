@@ -1431,8 +1431,6 @@ HPDF_Page_ShowText  (HPDF_Page    page,
         return HPDF_RaiseError (page->error, HPDF_PAGE_FONT_NOT_FOUND, 0);
 
     tw = HPDF_Page_TextWidth (page, text);
-    if (!tw)
-        return ret;
 
     if (InternalWriteText (attr, text) != HPDF_OK)
         return HPDF_CheckError (page->error);
