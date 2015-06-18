@@ -5591,6 +5591,11 @@ HPDF_GryphNameToUnicode  (const char  *gryph_name)
         map++;
     }
 
+    if ( HPDF_MemCmp( gryph_name, "uni", 3 ) == 0 )
+    {
+        return strtol( gryph_name + 3, NULL, 16 );
+    }
+
     return 0x0000;
 }
 
