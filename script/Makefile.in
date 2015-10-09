@@ -71,6 +71,7 @@ OBJS = \
 	src_SEP_hpdf_encoder_kr_OBJ_EXT \
 	src_SEP_hpdf_encoder_cns_OBJ_EXT \
 	src_SEP_hpdf_encoder_cnt_OBJ_EXT \
+	src_SEP_hpdf_encoder_utf_OBJ_EXT \
 	src_SEP_hpdf_fontdef_jp_OBJ_EXT \
 	src_SEP_hpdf_fontdef_kr_OBJ_EXT \
 	src_SEP_hpdf_fontdef_cns_OBJ_EXT \

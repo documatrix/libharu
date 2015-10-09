@@ -71,6 +71,7 @@ OBJS = \
 	src/hpdf_encoder_kr.o \
 	src/hpdf_encoder_cns.o \
 	src/hpdf_encoder_cnt.o \
+	src/hpdf_encoder_utf.o \
 	src/hpdf_fontdef_jp.o \
 	src/hpdf_fontdef_kr.o \
 	src/hpdf_fontdef_cns.o \
