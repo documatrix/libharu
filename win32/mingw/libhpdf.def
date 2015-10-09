@@ -208,3 +208,4 @@ EXPORTS
  HPDF_UseJPFonts@4                   = HPDF_UseJPFonts
  HPDF_UseKREncodings@4               = HPDF_UseKREncodings
  HPDF_UseKRFonts@4                   = HPDF_UseKRFonts
+ HPDF_UseUTFEncodings@4              = HPDF_UseUTFEncodings

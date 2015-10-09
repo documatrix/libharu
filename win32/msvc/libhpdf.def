@@ -221,6 +221,7 @@ EXPORTS
     HPDF_UseJPFonts
     HPDF_UseKREncodings
     HPDF_UseKRFonts
+    HPDF_UseUTFEncodings
     HPDF_Annot_Set3DView
     HPDF_Page_Create3DView
     HPDF_MarkupAnnot_SetTitle
