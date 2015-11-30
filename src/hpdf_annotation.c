@@ -377,6 +377,15 @@ HPDF_LinkAnnot_SetBorderStyle  (HPDF_Annotation  annot,
 }
 
 HPDF_EXPORT(HPDF_STATUS)
+HPDF_Annotation_SetFlags  (HPDF_Annotation  annot,
+                           HPDF_UINT32      flags)
+{
+    HPDF_PTRACE((" HPDF_Annotation_SetFlags\n"));
+
+    return HPDF_Dict_AddNumber(annot, "F", flags);
+}
+
+HPDF_EXPORT(HPDF_STATUS)
 HPDF_LinkAnnot_SetHighlightMode  (HPDF_Annotation           annot,
                                   HPDF_AnnotHighlightMode  mode)
 {

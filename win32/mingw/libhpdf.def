@@ -58,6 +58,7 @@ EXPORTS
  HPDF_Image_SetMaskImage@8           = HPDF_Image_SetMaskImage
  HPDF_Image_SetMask@8                = HPDF_Image_SetMask
  HPDF_InsertPage@8                   = HPDF_InsertPage
+ HPDF_Annotation_SetFlags@8          = HPDF_Annotation_SetFlags
  HPDF_LinkAnnot_SetBorderStyle@16    = HPDF_LinkAnnot_SetBorderStyle
  HPDF_LinkAnnot_SetHighlightMode@8   = HPDF_LinkAnnot_SetHighlightMode
  HPDF_LoadJpegImageFromFile@8        = HPDF_LoadJpegImageFromFile

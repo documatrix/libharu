@@ -593,6 +593,10 @@ HPDF_Page_CreateCircleAnnot (HPDF_Page          page,
 							 HPDF_Encoder       encoder);
 
 HPDF_EXPORT(HPDF_STATUS)
+HPDF_Annotation_SetFlags  (HPDF_Annotation  annot,
+                           HPDF_UINT32      flags);
+
+HPDF_EXPORT(HPDF_STATUS)
 HPDF_LinkAnnot_SetHighlightMode  (HPDF_Annotation           annot,
                                   HPDF_AnnotHighlightMode   mode);
 
