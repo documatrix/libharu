@@ -180,6 +180,10 @@ Type1Font_CreateDescriptor  (HPDF_MMgr  mmgr,
         ret += HPDF_Dict_AddName (descriptor, "Type", "FontDescriptor");
         ret += HPDF_Dict_AddNumber (descriptor, "Ascent", def->ascent);
         ret += HPDF_Dict_AddNumber (descriptor, "Descent", def->descent);
+        if (def->cap_height)
+        {
+          ret += HPDF_Dict_AddNumber (descriptor, "CapHeight", def->cap_height);
+        }
         ret += HPDF_Dict_AddNumber (descriptor, "Flags", def->flags);
 
         array = HPDF_Box_Array_New (mmgr, def->font_bbox);
