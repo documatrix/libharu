@@ -74,6 +74,7 @@ OBJS = \
 	src\hpdf_page_operator.obj \
 	src\hpdf_destination.obj \
 	src\hpdf_annotation.obj \
+	src\hpdf_pdfa.obj \
 	src\hpdf_outline.obj \
 	src\hpdf_image.obj \
 	src\hpdf_encoder_jp.obj \

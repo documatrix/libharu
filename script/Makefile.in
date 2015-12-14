@@ -65,6 +65,7 @@ OBJS = \
 	src_SEP_hpdf_page_operator_OBJ_EXT \
 	src_SEP_hpdf_destination_OBJ_EXT \
 	src_SEP_hpdf_annotation_OBJ_EXT \
+	src_SEP_hpdf_pdfa_OBJ_EXT \
 	src_SEP_hpdf_outline_OBJ_EXT \
 	src_SEP_hpdf_image_OBJ_EXT \
 	src_SEP_hpdf_encoder_jp_OBJ_EXT \

@@ -71,6 +71,7 @@ EXPORTS
  HPDF_LoadType1FontFromFile@12       = HPDF_LoadType1FontFromFile
  HPDF_LoadType1FontFromFile2@12      = HPDF_LoadType1FontFromFile2
  HPDF_LoadType1FontFromFileNative@12 = HPDF_LoadType1FontFromFileNative
+ HPDF_LoadIccProfileFromFile@12      = HPDF_LoadIccProfileFromFile
  HPDF_New@8                          = HPDF_New
  HPDF_NewDoc@4                       = HPDF_NewDoc
  HPDF_NewEx@20                       = HPDF_NewEx
@@ -210,3 +211,5 @@ EXPORTS
  HPDF_UseKREncodings@4               = HPDF_UseKREncodings
  HPDF_UseKRFonts@4                   = HPDF_UseKRFonts
  HPDF_UseUTFEncodings@4              = HPDF_UseUTFEncodings
+ HPDF_PDFA_SetPDFAConformance@8      = HPDF_PDFA_SetPDFAConformance
+ HPDF_PDFA_AppendOutputIntents@12    = HPDF_PDFA_AppendOutputIntents

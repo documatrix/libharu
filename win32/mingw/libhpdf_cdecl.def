@@ -72,6 +72,7 @@ EXPORTS
     HPDF_LoadTTFontFromFile
     HPDF_LoadTTFontFromFile2
     HPDF_LoadType1FontFromFile
+    HPDF_LoadIccProfileFromFile
     HPDF_New
     HPDF_NewDoc
     HPDF_NewEx
@@ -247,3 +248,5 @@ EXPORTS
     HPDF_Page_CreateCircleAnnot
     HPDF_Page_CreateSquareAnnot
     HPDF_Annotation_SetBorderStyle
+    HPDF_PDFA_SetPDFAConformance
+    HPDF_PDFA_AppendOutputIntents
