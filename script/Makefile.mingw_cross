@@ -65,6 +65,7 @@ OBJS = \
 	src/hpdf_page_operator.o \
 	src/hpdf_destination.o \
 	src/hpdf_annotation.o \
+	src/hpdf_pdfa.o \
 	src/hpdf_outline.o \
 	src/hpdf_image.o \
 	src/hpdf_encoder_jp.o \
