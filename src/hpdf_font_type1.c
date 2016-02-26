@@ -349,7 +349,7 @@ Type1Font_OnWrite  (HPDF_Dict    obj,
     HPDF_PTRACE ((" HPDF_Font_Type1Font_OnWrite\n"));
 
     /* if font is base14-font these entries is not required */
-    if (!fontdef_attr->is_base14font || encoder_attr->has_differences) {
+    if ( ( fontdef_attr->write_widths || fontdef_attr->font_data ) && ( !fontdef_attr->is_base14font || encoder_attr->has_differences ) ) {
         char *pbuf;
 
         pbuf = (char *)HPDF_StrCpy (buf, "/FirstChar ", eptr);

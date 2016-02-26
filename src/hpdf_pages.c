@@ -2330,3 +2330,14 @@ HPDF_Page_SetFilter  (HPDF_Page    page,
     attr->contents->filter = filter;
 }
 
+void
+HPDF_Page_SetTextPlacementAccuracy  (HPDF_Page    page,
+                                     HPDF_UINT decimal_places)
+{
+    HPDF_PageAttr attr;
+
+    HPDF_PTRACE((" HPDF_Page_SetTextPlacementAccuracy\n"));
+
+    attr = (HPDF_PageAttr)page->attr;
+    attr->text_placement_accuracy = decimal_places;
+}

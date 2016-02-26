@@ -63,6 +63,12 @@ typedef struct _HPDF_Doc_Rec {
     /* default compression mode */
     HPDF_BOOL         compression_mode;
 
+    /* decimal places for text placement accuracy */
+    HPDF_UINT         text_placement_accuracy;
+
+    /* states if font widths will be written for fonts without font data */
+    HPDF_BOOL         write_font_widths;
+
     HPDF_BOOL         encrypt_on;
     HPDF_EncryptDict  encrypt_dict;
 

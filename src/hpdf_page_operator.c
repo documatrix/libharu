@@ -1270,13 +1270,17 @@ HPDF_Page_MoveTextPos  (HPDF_Page  page,
 
     HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
 
-    pbuf = HPDF_FToA (pbuf, x, eptr);
+    pbuf = HPDF_FToA2 (pbuf, x, eptr, attr->text_placement_accuracy);
     *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, y, eptr);
+    pbuf = HPDF_FToA2 (pbuf, y, eptr, attr->text_placement_accuracy);
     HPDF_StrCpy (pbuf, " Td\012", eptr);
 
     if (HPDF_Stream_WriteStr (attr->stream, buf) != HPDF_OK)
         return HPDF_CheckError (page->error);
+
+    float round = HPDF_DECIMAL_ROUND_COEFFICIENT[attr->text_placement_accuracy];
+    x = roundf(x * round) / round;
+    y = roundf(y * round) / round;
 
     attr->text_matrix.x += x * attr->text_matrix.a + y * attr->text_matrix.c;
     attr->text_matrix.y += y * attr->text_matrix.d + x * attr->text_matrix.b;
@@ -1307,13 +1311,17 @@ HPDF_Page_MoveTextPos2  (HPDF_Page  page,
 
     HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
 
-    pbuf = HPDF_FToA (pbuf, x, eptr);
+    pbuf = HPDF_FToA2 (pbuf, x, eptr, attr->text_placement_accuracy);
     *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, y, eptr);
+    pbuf = HPDF_FToA2 (pbuf, y, eptr, attr->text_placement_accuracy);
     HPDF_StrCpy (pbuf, " TD\012", eptr);
 
     if (HPDF_Stream_WriteStr (attr->stream, buf) != HPDF_OK)
         return HPDF_CheckError (page->error);
+
+    float round = HPDF_DECIMAL_ROUND_COEFFICIENT[attr->text_placement_accuracy];
+    x = roundf(x * round) / round;
+    y = roundf(y * round) / round;
 
     attr->text_matrix.x += x * attr->text_matrix.a + y * attr->text_matrix.c;
     attr->text_matrix.y += y * attr->text_matrix.d + x * attr->text_matrix.b;

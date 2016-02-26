@@ -68,6 +68,9 @@
 #define HPDF_DEF_PAGE_WIDTH         595.276F
 #define HPDF_DEF_PAGE_HEIGHT        841.89F
 
+/* default decimal places for text placement accuracy */
+#define HPDF_DEF_TEXT_PLACEMENT_ACCURACY  5
+
 /*---------------------------------------------------------------------------*/
 /*----- compression mode ----------------------------------------------------*/
 
