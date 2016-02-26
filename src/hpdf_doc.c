@@ -175,6 +175,9 @@ HPDF_NewEx  (HPDF_Error_Handler    user_error_fn,
     pdf->pdf_version = HPDF_VER_13;
     pdf->compression_mode = HPDF_COMP_NONE;
 
+    pdf->text_placement_accuracy = HPDF_DEF_TEXT_PLACEMENT_ACCURACY;
+    pdf->write_font_widths = HPDF_TRUE;
+
     /* copy the data of temporary-error object to the one which is
        included in pdf_doc object */
     pdf->error = tmp_error;
@@ -342,6 +345,8 @@ HPDF_FreeDocAll  (HPDF_Doc  pdf)
             FreeEncoderList (pdf);
 
         pdf->compression_mode = HPDF_COMP_NONE;
+        pdf->text_placement_accuracy = HPDF_DEF_TEXT_PLACEMENT_ACCURACY;
+        pdf->write_font_widths = HPDF_TRUE;
 
         HPDF_Error_Reset (&pdf->error);
     }
@@ -900,6 +905,8 @@ HPDF_AddPage  (HPDF_Doc  pdf)
     if (pdf->compression_mode & HPDF_COMP_TEXT)
         HPDF_Page_SetFilter (page, HPDF_STREAM_FILTER_FLATE_DECODE);
 
+    HPDF_Page_SetTextPlacementAccuracy (page, pdf->text_placement_accuracy);
+
     pdf->cur_page_num++;
 
     return page;
@@ -980,6 +987,8 @@ HPDF_InsertPage  (HPDF_Doc    pdf,
 
     if (pdf->compression_mode & HPDF_COMP_TEXT)
         HPDF_Page_SetFilter (page, HPDF_STREAM_FILTER_FLATE_DECODE);
+
+    HPDF_Page_SetTextPlacementAccuracy (page, pdf->text_placement_accuracy);
 
     return page;
 }
@@ -1567,6 +1576,9 @@ LoadType1FontFromStream  (HPDF_Doc      pdf,
             HPDF_SetError (&pdf->error, HPDF_FONT_EXISTS, 0);
             return NULL;
         }
+
+        HPDF_Type1FontDefAttr fontdef_attr = (HPDF_Type1FontDefAttr)def->attr;
+        fontdef_attr->write_widths = pdf->write_font_widths;
 
         if (HPDF_List_Add (pdf->fontdef_list, def) != HPDF_OK) {
             HPDF_FontDef_Free (def);
@@ -2526,3 +2538,29 @@ HPDF_LoadIccProfileFromFile  (HPDF_Doc pdf,
     return iccentry;
 }
 
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetTextPlacementAccuracy (HPDF_Doc  pdf,
+                               HPDF_UINT decimal_places)
+{
+    if (!HPDF_HasDoc (pdf))
+        return HPDF_INVALID_DOCUMENT;
+
+    if (decimal_places > 5)
+        return HPDF_RaiseError (&pdf->error, HPDF_INVALID_PARAMETER, 0);
+
+    pdf->text_placement_accuracy = decimal_places;
+
+    return HPDF_OK;
+}
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetWriteFontWidths (HPDF_Doc  pdf,
+                         HPDF_BOOL write_font_widths)
+{
+    if (!HPDF_HasDoc (pdf))
+        return HPDF_INVALID_DOCUMENT;
+
+    pdf->write_font_widths = write_font_widths;
+
+    return HPDF_OK;
+}

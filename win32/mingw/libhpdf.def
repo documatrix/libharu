@@ -188,6 +188,8 @@ EXPORTS
  HPDF_SaveToFile@8                   = HPDF_SaveToFile
  HPDF_SaveToStream@4                 = HPDF_SaveToStream
  HPDF_SetCompressionMode@8           = HPDF_SetCompressionMode
+ HPDF_SetTextPlacementAccuracy@8     = HPDF_SetTextPlacementAccuracy
+ HPDF_SetWriteFontWidths@8           = HPDF_SetWriteFontWidths
  HPDF_SetCurrentEncoder@8            = HPDF_SetCurrentEncoder
  HPDF_SetEncryptionMode@12           = HPDF_SetEncryptionMode
  HPDF_SetErrorHandler@8              = HPDF_SetErrorHandler

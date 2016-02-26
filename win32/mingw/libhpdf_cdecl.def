@@ -187,6 +187,8 @@ EXPORTS
     HPDF_SaveToFile
     HPDF_SaveToStream
     HPDF_SetCompressionMode
+    HPDF_SetTextPlacementAccuracy
+    HPDF_SetWriteFontWidths
     HPDF_SetCurrentEncoder
     HPDF_SetEncryptionMode
     HPDF_SetErrorHandler

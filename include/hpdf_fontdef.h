@@ -151,6 +151,7 @@ typedef struct _HPDF_Type1FontDefAttrRec {
     HPDF_UINT       length3;
     HPDF_BOOL       is_base14font;
     HPDF_BOOL       is_fixed_pitch;
+    HPDF_BOOL       write_widths;
 
     HPDF_Stream     font_data;
 } HPDF_Type1FontDefAttr_Rec;

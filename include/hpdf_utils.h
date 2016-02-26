@@ -25,6 +25,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* can be used for rounding to 0-5 decimal places */
+static const int HPDF_DECIMAL_ROUND_COEFFICIENT[] = {1, 10, 100, 1000, 10000, 100000};
+
 HPDF_INT
 HPDF_AToI  (const char*  s);
 
@@ -50,6 +53,11 @@ HPDF_FToA  (char  *s,
             HPDF_REAL  val,
             char  *eptr);
 
+char*
+HPDF_FToA2  (char       *s,
+             HPDF_REAL   val,
+             char       *eptr,
+             HPDF_UINT   decimal_places);
 
 HPDF_BYTE*
 HPDF_MemCpy  (HPDF_BYTE*        out,

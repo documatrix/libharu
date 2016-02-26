@@ -1595,6 +1595,14 @@ HPDF_Page_TextField  (HPDF_Page            page,
                       HPDF_Font            font,
                       HPDF_REAL            font_size,
                       HPDF_Color           color);
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetTextPlacementAccuracy (HPDF_Doc  pdf,
+                               HPDF_UINT decimal_places);
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetWriteFontWidths (HPDF_Doc  pdf,
+                         HPDF_BOOL write_font_widths);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
