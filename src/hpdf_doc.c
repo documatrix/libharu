@@ -1605,11 +1605,17 @@ LoadType1FontFromStream2  (HPDF_Doc      pdf,
     def = HPDF_Type1FontDef_Load (pdf->mmgr, afmdata, NULL, HPDF_FALSE);
 
     if (def) {
-        char newname[] = "HPDF_";
-        if(font_name)
+        char *newname;
+        newname = (char *)malloc( 6 );
+        strcpy( newname, "HPDF_" );
+
+        if(font_name) {
+            newname = (char *)realloc( newname, strlen( newname ) + strlen( font_name ) + 1 );
             strcat(newname, font_name);
-        else
+        } else {
+            newname = (char *)realloc( newname, strlen( newname ) + strlen( def->base_font ) + 1 );
             strcat(newname, def->base_font);
+        }
 
         HPDF_StrCpy (def->base_font, newname, def->base_font + HPDF_LIMIT_MAX_NAME_LEN);
         def->is_form_font = HPDF_TRUE;
