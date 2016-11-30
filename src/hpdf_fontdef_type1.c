@@ -252,8 +252,19 @@ LoadAfm (HPDF_FontDef  fontdef,
         HPDF_INT16 unicode = 0;
 
         len = HPDF_TMP_BUF_SIZ;
-        if ((ret = HPDF_Stream_ReadLn (stream, buf, &len)) != HPDF_OK)
-            return ret;
+        if ((ret = HPDF_Stream_ReadLn (stream, buf, &len)) != HPDF_OK) {
+            if (ret == HPDF_STREAM_READLN_CONTINUE) {
+                /* Skip the rest of the line */
+                char skip[HPDF_TMP_BUF_SIZ];
+                while ((ret = HPDF_Stream_ReadLn (stream, skip, &len)) == HPDF_STREAM_READLN_CONTINUE);
+
+                if (ret != HPDF_OK) {
+                    return ret;
+                }
+            } else {
+                return ret;
+            }
+        }
 
         /* C default character code. */
         s = GetKeyword (buf, buf2, HPDF_LIMIT_MAX_NAME_LEN + 1);
