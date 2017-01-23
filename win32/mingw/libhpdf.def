@@ -139,12 +139,14 @@ EXPORTS
  HPDF_Page_GetWordSpace@4            = HPDF_Page_GetWordSpace
  HPDF_Page_GRestore@4                = HPDF_Page_GRestore
  HPDF_Page_GSave@4                   = HPDF_Page_GSave
+ HPDF_Page_Insert_Shared_Content_Stream@8 = HPDF_Page_Insert_Shared_Content_Stream
  HPDF_Page_LineTo@12                 = HPDF_Page_LineTo
  HPDF_Page_MeasureText@20            = HPDF_Page_MeasureText
  HPDF_Page_MoveTextPos@12            = HPDF_Page_MoveTextPos
  HPDF_Page_MoveTextPos2@12           = HPDF_Page_MoveTextPos2
  HPDF_Page_MoveTo@12                 = HPDF_Page_MoveTo
  HPDF_Page_MoveToNextLine@4          = HPDF_Page_MoveToNextLine
+ HPDF_Page_New_Content_Stream@8      = HPDF_Page_New_Content_Stream
  HPDF_Page_Rectangle@20              = HPDF_Page_Rectangle
  HPDF_Page_SetCharSpace@8            = HPDF_Page_SetCharSpace
  HPDF_Page_SetCMYKFill@20            = HPDF_Page_SetCMYKFill
