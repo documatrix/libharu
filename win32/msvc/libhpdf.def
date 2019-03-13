@@ -231,6 +231,7 @@ EXPORTS
     HPDF_Annot_Set3DView
     HPDF_Page_Create3DView
     HPDF_MarkupAnnot_SetTitle
+    HPDF_MarkupAnnot_SetTitle_Unicode
     HPDF_MarkupAnnot_SetSubject
     HPDF_MarkupAnnot_SetCreationDate
     HPDF_MarkupAnnot_SetTransparency

@@ -636,6 +636,9 @@ HPDF_EXPORT(HPDF_STATUS)
 HPDF_MarkupAnnot_SetTitle (HPDF_Annotation annot, const char* name);
 
 HPDF_EXPORT(HPDF_STATUS)
+HPDF_MarkupAnnot_SetTitle_Unicode (HPDF_Annotation annot, const char* name, HPDF_UINT16 unicode_len);
+
+HPDF_EXPORT(HPDF_STATUS)
 HPDF_MarkupAnnot_SetSubject (HPDF_Annotation annot, const char* name);
 
 HPDF_EXPORT(HPDF_STATUS)
