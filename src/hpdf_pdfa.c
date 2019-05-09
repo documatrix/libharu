@@ -50,6 +50,8 @@
 #define PDF_FOOTER               "</rdf:Description>"
 #define PDFAID_PDFA1A            "<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/' pdfaid:part='1' pdfaid:conformance='A'/>"
 #define PDFAID_PDFA1B            "<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/' pdfaid:part='1' pdfaid:conformance='B'/>"
+#define PDFAID_PDFA2A            "<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/' pdfaid:part='2' pdfaid:conformance='A'/>"
+#define PDFAID_PDFA2B            "<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/' pdfaid:part='2' pdfaid:conformance='B'/>"
 #define FOOTER                   "</rdf:RDF></x:xmpmeta><?xpacket end='w'?>"
 
 
@@ -264,6 +266,12 @@ HPDF_PDFA_SetPDFAConformance (HPDF_Doc pdf,HPDF_PDFAType pdfatype)
             break;
           case HPDF_PDFA_1B:
             ret += HPDF_Stream_WriteStr(xmp->stream, PDFAID_PDFA1B);
+            break;
+          case HPDF_PDFA_2A:
+            ret += HPDF_Stream_WriteStr(xmp->stream, PDFAID_PDFA2A);
+            break;
+          case HPDF_PDFA_2B:
+            ret += HPDF_Stream_WriteStr(xmp->stream, PDFAID_PDFA2B);
             break;
         }
 
