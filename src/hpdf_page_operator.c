@@ -2274,10 +2274,10 @@ InternalArc  (HPDF_Page    page,
         *pbuf++ = ' ';
         pbuf = HPDF_FToA (pbuf, (HPDF_REAL)y0, eptr);
 
-	if (attr->gmode == HPDF_GMODE_PATH_OBJECT)
-	  pbuf = (char *)HPDF_StrCpy (pbuf, " l\012", eptr);
-	else
-	  pbuf = (char *)HPDF_StrCpy (pbuf, " m\012", eptr);
+        if (attr->gmode == HPDF_GMODE_PATH_OBJECT)
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l\012", eptr);
+        else
+            pbuf = (char *)HPDF_StrCpy (pbuf, " m\012", eptr);
     }
 
     pbuf = HPDF_FToA (pbuf, (HPDF_REAL)x1, eptr);
@@ -2304,6 +2304,127 @@ InternalArc  (HPDF_Page    page,
     return ret;
 }
 
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_Arc2  (HPDF_Page    page,
+                HPDF_REAL    x,
+                HPDF_REAL    y,
+                HPDF_REAL    ray,
+                HPDF_REAL    ang1,
+                HPDF_REAL    ang2)
+{
+    HPDF_BOOL cont_flg = HPDF_FALSE;
+
+    HPDF_STATUS ret = HPDF_Page_CheckState (page, HPDF_GMODE_PAGE_DESCRIPTION |
+                    HPDF_GMODE_PATH_OBJECT);
+
+    HPDF_PTRACE ((" HPDF_Page_Arc2\n"));
+
+    if (fabs(ang2 - ang1) > 360)
+        HPDF_RaiseError (page->error, HPDF_PAGE_OUT_OF_RANGE, 0);
+
+    if (ret != HPDF_OK)
+        return ret;
+
+    while (ang1 < 0 || ang2 < 0) {
+        ang1 = ang1 + 360;
+        ang2 = ang2 + 360;
+    }
+
+
+    for (;;) {
+        if (fabs(ang2 - ang1) <= 90)
+            return InternalArc (page, x, y, ray, ang1, ang2, cont_flg);
+        else {
+	    HPDF_REAL tmp_ang = (ang2 > ang1 ? ang1 + 90 : ang1 - 90);
+
+            if ((ret = InternalArc (page, x, y, ray, ang1, tmp_ang, cont_flg))
+                    != HPDF_OK)
+                return ret;
+
+            ang1 = tmp_ang;
+        }
+
+        if (fabs(ang1 - ang2) < 0.1)
+            break;
+
+        cont_flg = HPDF_TRUE;
+    }
+
+    return HPDF_OK;
+}
+
+static HPDF_STATUS
+InternalArc2  (HPDF_Page    page,
+              HPDF_REAL    x,
+              HPDF_REAL    y,
+              HPDF_REAL    ray,
+              HPDF_REAL    ang1,
+              HPDF_REAL    ang2,
+              HPDF_BOOL    cont_flg)
+{
+    const HPDF_REAL PIE = 3.14159F;
+
+    char buf[HPDF_TMP_BUF_SIZ];
+    char *pbuf = buf;
+    char *eptr = buf + HPDF_TMP_BUF_SIZ - 1;
+    HPDF_PageAttr attr;
+    HPDF_STATUS ret;
+
+    HPDF_DOUBLE rx0, ry0, rx1, ry1, rx2, ry2, rx3, ry3;
+    HPDF_DOUBLE x0, y0, x1, y1, x2, y2, x3, y3;
+    HPDF_DOUBLE delta_angle;
+    HPDF_DOUBLE new_angle;
+
+    HPDF_PTRACE ((" HPDF_Page_InternalArc2\n"));
+
+    attr = (HPDF_PageAttr)page->attr;
+
+    HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
+
+    delta_angle = (90 - (HPDF_DOUBLE)(ang1 + ang2) / 2) / 180 * PIE;
+    new_angle = (HPDF_DOUBLE)(ang2 - ang1) / 2 / 180 * PIE;
+
+    rx0 = ray * HPDF_COS (new_angle);
+    ry0 = ray * HPDF_SIN (new_angle);
+    rx2 = (ray * 4.0 - rx0) / 3.0;
+    ry2 = ((ray * 1.0 - rx0) * (rx0 - ray * 3.0)) / (3.0 * ry0);
+    rx1 = rx2;
+    ry1 = -ry2;
+    rx3 = rx0;
+    ry3 = -ry0;
+
+    x0 = rx0 * HPDF_COS (delta_angle) - ry0 * HPDF_SIN (delta_angle) + x;
+    y0 = rx0 * HPDF_SIN (delta_angle) + ry0 * HPDF_COS (delta_angle) + y;
+    x1 = rx1 * HPDF_COS (delta_angle) - ry1 * HPDF_SIN (delta_angle) + x;
+    y1 = rx1 * HPDF_SIN (delta_angle) + ry1 * HPDF_COS (delta_angle) + y;
+    x2 = rx2 * HPDF_COS (delta_angle) - ry2 * HPDF_SIN (delta_angle) + x;
+    y2 = rx2 * HPDF_SIN (delta_angle) + ry2 * HPDF_COS (delta_angle) + y;
+    x3 = rx3 * HPDF_COS (delta_angle) - ry3 * HPDF_SIN (delta_angle) + x;
+    y3 = rx3 * HPDF_SIN (delta_angle) + ry3 * HPDF_COS (delta_angle) + y;
+
+    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)x1, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)y1, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)x2, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)y2, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)x3, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)y3, eptr);
+    HPDF_StrCpy (pbuf, " c\012", eptr);
+
+    if ((ret = HPDF_Stream_WriteStr (attr->stream, buf)) != HPDF_OK)
+        return HPDF_CheckError (page->error);
+
+    attr->cur_pos.x = (HPDF_REAL)x3;
+    attr->cur_pos.y = (HPDF_REAL)y3;
+    attr->str_pos = attr->cur_pos;
+    attr->gmode = HPDF_GMODE_PATH_OBJECT;
+
+    return ret;
+}
 
 HPDF_EXPORT(HPDF_STATUS)
 HPDF_Page_DrawImage  (HPDF_Page    page,
