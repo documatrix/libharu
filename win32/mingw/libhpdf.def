@@ -92,6 +92,7 @@ EXPORTS
  HPDF_Outline_SetOpened@8            = HPDF_Outline_SetOpened
  HPDF_Outline_GetParent@8            = HPDF_Outline_GetParent
  HPDF_Page_Arc@24                    = HPDF_Page_Arc
+ HPDF_Page_Arc2@24                   = HPDF_Page_Arc2
  HPDF_Page_BeginText@4               = HPDF_Page_BeginText
  HPDF_Page_Circle@16                 = HPDF_Page_Circle
  HPDF_Page_Clip@4                    = HPDF_Page_Clip

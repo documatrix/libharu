@@ -89,6 +89,7 @@ EXPORTS
     HPDF_Outline_SetDestination
     HPDF_Outline_SetOpened
     HPDF_Page_Arc
+    HPDF_Page_Arc2
     HPDF_Page_BeginText
     HPDF_Page_Circle
     HPDF_Page_Clip
