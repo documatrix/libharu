@@ -94,6 +94,7 @@ EXPORTS
  HPDF_Page_Arc@24                    = HPDF_Page_Arc
  HPDF_Page_Arc2@24                   = HPDF_Page_Arc2
  HPDF_Page_BeginText@4               = HPDF_Page_BeginText
+ HPDF_Page_CheckboxField@8           = HPDF_Page_CheckboxField
  HPDF_Page_Circle@16                 = HPDF_Page_Circle
  HPDF_Page_Clip@4                    = HPDF_Page_Clip
  HPDF_Page_ClosePath@4               = HPDF_Page_ClosePath
@@ -193,6 +194,7 @@ EXPORTS
  HPDF_Page_ShowText@8                = HPDF_Page_ShowText
  HPDF_Page_ShowTextNextLine@8        = HPDF_Page_ShowTextNextLine
  HPDF_Page_ShowTextNextLineEx@16     = HPDF_Page_ShowTextNextLineEx
+ HPDF_Page_SignatureField@8          = HPDF_Page_SignatureField
  HPDF_Page_Stroke@4                  = HPDF_Page_Stroke
  HPDF_Page_TextField@8               = HPDF_Page_TextField
  HPDF_Page_TextOut@16                = HPDF_Page_TextOut

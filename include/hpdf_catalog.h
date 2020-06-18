@@ -18,6 +18,7 @@
 #ifndef _HPDF_CATALOG_H
 #define _HPDF_CATALOG_H
 
+#include "hpdf_gstate.h"
 #include "hpdf_objects.h"
 
 #ifdef __cplusplus
@@ -90,6 +91,14 @@ HPDF_Catalog_SetViewerPreference  (HPDF_Catalog   catalog,
 
 HPDF_BOOL
 HPDF_Catalog_Validate  (HPDF_Catalog  catalog);
+
+HPDF_STATUS
+HPDF_Catalog_AddInteractiveField (HPDF_Catalog  catalog,
+                                  HPDF_Dict     field);
+
+const char*
+HPDF_Catalog_GetLocalFontName  (HPDF_Catalog  catalog,
+                                HPDF_Font     font);
 
 #ifdef __cplusplus
 }
