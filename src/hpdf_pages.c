@@ -925,10 +925,10 @@ HPDF_Page_GetExtGStateName  (HPDF_Page       page,
 
 
 HPDF_STATUS
-HPDF_Page_CreateTextFieldAnnotation  (HPDF_Page  page,
-                                      HPDF_Dict  textField)
+HPDF_Page_CreateFieldAnnotation (HPDF_Page  page,
+                                 HPDF_Dict  field)
 {
-    return AddAnnotation ( page, textField );
+    return AddAnnotation ( page, field );
 }
 
 

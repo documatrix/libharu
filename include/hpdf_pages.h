@@ -66,7 +66,7 @@ typedef struct _HPDF_PageAttr_Rec {
     HPDF_Xref          xref;
     HPDF_UINT          compression_mode;
     HPDF_UINT          text_placement_accuracy;
-	HPDF_PDFVer       *ver; 
+    HPDF_PDFVer       *ver;
 } HPDF_PageAttr_Rec;
 
 
@@ -123,6 +123,10 @@ HPDF_STATUS
 HPDF_Page_CheckState  (HPDF_Page  page,
                        HPDF_UINT  mode);
 
+
+HPDF_STATUS
+HPDF_Page_CreateFieldAnnotation (HPDF_Page  page,
+                                 HPDF_Dict  field);
 
 #ifdef __cplusplus
 }

@@ -2353,79 +2353,6 @@ HPDF_Page_Arc2  (HPDF_Page    page,
     return HPDF_OK;
 }
 
-static HPDF_STATUS
-InternalArc2  (HPDF_Page    page,
-              HPDF_REAL    x,
-              HPDF_REAL    y,
-              HPDF_REAL    ray,
-              HPDF_REAL    ang1,
-              HPDF_REAL    ang2,
-              HPDF_BOOL    cont_flg)
-{
-    const HPDF_REAL PIE = 3.14159F;
-
-    char buf[HPDF_TMP_BUF_SIZ];
-    char *pbuf = buf;
-    char *eptr = buf + HPDF_TMP_BUF_SIZ - 1;
-    HPDF_PageAttr attr;
-    HPDF_STATUS ret;
-
-    HPDF_DOUBLE rx0, ry0, rx1, ry1, rx2, ry2, rx3, ry3;
-    HPDF_DOUBLE x0, y0, x1, y1, x2, y2, x3, y3;
-    HPDF_DOUBLE delta_angle;
-    HPDF_DOUBLE new_angle;
-
-    HPDF_PTRACE ((" HPDF_Page_InternalArc2\n"));
-
-    attr = (HPDF_PageAttr)page->attr;
-
-    HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
-
-    delta_angle = (90 - (HPDF_DOUBLE)(ang1 + ang2) / 2) / 180 * PIE;
-    new_angle = (HPDF_DOUBLE)(ang2 - ang1) / 2 / 180 * PIE;
-
-    rx0 = ray * HPDF_COS (new_angle);
-    ry0 = ray * HPDF_SIN (new_angle);
-    rx2 = (ray * 4.0 - rx0) / 3.0;
-    ry2 = ((ray * 1.0 - rx0) * (rx0 - ray * 3.0)) / (3.0 * ry0);
-    rx1 = rx2;
-    ry1 = -ry2;
-    rx3 = rx0;
-    ry3 = -ry0;
-
-    x0 = rx0 * HPDF_COS (delta_angle) - ry0 * HPDF_SIN (delta_angle) + x;
-    y0 = rx0 * HPDF_SIN (delta_angle) + ry0 * HPDF_COS (delta_angle) + y;
-    x1 = rx1 * HPDF_COS (delta_angle) - ry1 * HPDF_SIN (delta_angle) + x;
-    y1 = rx1 * HPDF_SIN (delta_angle) + ry1 * HPDF_COS (delta_angle) + y;
-    x2 = rx2 * HPDF_COS (delta_angle) - ry2 * HPDF_SIN (delta_angle) + x;
-    y2 = rx2 * HPDF_SIN (delta_angle) + ry2 * HPDF_COS (delta_angle) + y;
-    x3 = rx3 * HPDF_COS (delta_angle) - ry3 * HPDF_SIN (delta_angle) + x;
-    y3 = rx3 * HPDF_SIN (delta_angle) + ry3 * HPDF_COS (delta_angle) + y;
-
-    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)x1, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)y1, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)x2, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)y2, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)x3, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, (HPDF_REAL)y3, eptr);
-    HPDF_StrCpy (pbuf, " c\012", eptr);
-
-    if ((ret = HPDF_Stream_WriteStr (attr->stream, buf)) != HPDF_OK)
-        return HPDF_CheckError (page->error);
-
-    attr->cur_pos.x = (HPDF_REAL)x3;
-    attr->cur_pos.y = (HPDF_REAL)y3;
-    attr->str_pos = attr->cur_pos;
-    attr->gmode = HPDF_GMODE_PATH_OBJECT;
-
-    return ret;
-}
-
 HPDF_EXPORT(HPDF_STATUS)
 HPDF_Page_DrawImage  (HPDF_Page    page,
                       HPDF_Image   image,
@@ -2953,7 +2880,7 @@ HPDF_Page_New_Content_Stream  (HPDF_Page page,
 
     /* check if there is already an array of contents */
     contents_array = (HPDF_Array) HPDF_Dict_GetItem(page,"Contents", HPDF_OCLASS_ARRAY);
-    if (!contents_array) {	
+    if (!contents_array) {
         HPDF_Error_Reset (page->error);
         /* no contents_array already -- create one
            and replace current single contents item */
@@ -2974,7 +2901,7 @@ HPDF_Page_New_Content_Stream  (HPDF_Page page,
 
     ret += HPDF_Array_Add (contents_array,attr->contents);
 
-    /* return the value of the new stream, so that 
+    /* return the value of the new stream, so that
        the application can use it as a shared contents stream */
     if (ret == HPDF_OK && new_stream != NULL)
         *new_stream = attr->contents;
@@ -3002,7 +2929,7 @@ HPDF_Page_Insert_Shared_Content_Stream  (HPDF_Page page,
 
     /* check if there is already an array of contents */
     contents_array = (HPDF_Array) HPDF_Dict_GetItem(page,"Contents", HPDF_OCLASS_ARRAY);
-    if (!contents_array) {	
+    if (!contents_array) {
         HPDF_PageAttr attr;
         HPDF_Error_Reset (page->error);
         /* no contents_array already -- create one
@@ -3073,6 +3000,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
 {
     HPDF_Dict textField;
     HPDF_STATUS ret;
+    const char *local_name;
 
     HPDF_PTRACE((" HPDF_Page_TextField\n"));
 
@@ -3125,7 +3053,13 @@ HPDF_Page_TextField  (HPDF_Page      page,
     HPDF_Dict f = HPDF_Dict_New (page->mmgr);
     if (!f)
         return HPDF_CheckError (page->error);
-    ret += HPDF_Dict_Add (f, HPDF_Catalog_GetLocalFontName (pdf->catalog, font), font);
+
+    local_name = HPDF_Catalog_GetLocalFontName (pdf->catalog, font);
+
+    if (!local_name)
+        return HPDF_RaiseError (page->error, HPDF_PAGE_INVALID_FONT, 0);
+
+    ret += HPDF_Dict_Add (f, local_name, font);
     ret += HPDF_Dict_Add (resource, "Font", f);
     ret += HPDF_Dict_Add (textField, "DR", resource);
 
@@ -3139,7 +3073,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
     {
         /* Gray Color Space */
         pbuf = HPDF_FToA (pbuf, color.gray, eptr);
-        pbuf = HPDF_StrCpy (pbuf, " g", eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " g", eptr);
     }
     else if (color.cs == HPDF_CS_DEVICE_RGB)
     {
@@ -3149,7 +3083,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
         pbuf = HPDF_FToA (pbuf, color.rgb.g, eptr);
         *pbuf++ = ' ';
         pbuf = HPDF_FToA (pbuf, color.rgb.b, eptr);
-        pbuf = HPDF_StrCpy (pbuf, " rg", eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " rg", eptr);
     }
     else if (color.cs == HPDF_CS_DEVICE_CMYK)
     {
@@ -3161,14 +3095,20 @@ HPDF_Page_TextField  (HPDF_Page      page,
         pbuf = HPDF_FToA (pbuf, color.cmyk.y, eptr);
         *pbuf++ = ' ';
         pbuf = HPDF_FToA (pbuf, color.cmyk.k, eptr);
-        pbuf = HPDF_StrCpy (pbuf, " k", eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " k", eptr);
     }
 
-    pbuf = HPDF_StrCpy (pbuf, " /", eptr);
-    pbuf = HPDF_StrCpy (pbuf, HPDF_Catalog_GetLocalFontName (pdf->catalog, font), eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " /", eptr);
+
+    local_name = HPDF_Catalog_GetLocalFontName (pdf->catalog, font);
+
+    if (!local_name)
+        return HPDF_RaiseError (page->error, HPDF_PAGE_INVALID_FONT, 0);
+
+    pbuf = (char *)HPDF_StrCpy (pbuf, local_name, eptr);
     *pbuf++ = ' ';
     pbuf = HPDF_FToA (pbuf, font_size, eptr);
-    pbuf = HPDF_StrCpy (pbuf, " Tf", eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " Tf", eptr);
 
     HPDF_String daValue = HPDF_String_New(page->mmgr, buf, NULL);
     if (!daValue)
@@ -3207,7 +3147,6 @@ HPDF_Page_TextField  (HPDF_Page      page,
     if (!ap_stream)
         return HPDF_CheckError (page->error);
     ret += HPDF_Dict_Add (ap, "N", ap_stream);
-
     ret += HPDF_Dict_Add (textField, "AP", ap);
 
     ret += HPDF_Dict_AddName (ap_stream, "Type", "XObject");
@@ -3230,7 +3169,13 @@ HPDF_Page_TextField  (HPDF_Page      page,
     HPDF_Dict font2 = HPDF_Dict_New (page->mmgr);
     if (!font2)
         return HPDF_CheckError (page->error);
-    ret += HPDF_Dict_Add (font2, HPDF_Catalog_GetLocalFontName (pdf->catalog, font), font);
+
+    local_name = HPDF_Catalog_GetLocalFontName (pdf->catalog, font);
+
+    if (!local_name)
+        return HPDF_RaiseError (page->error, HPDF_PAGE_INVALID_FONT, 0);
+
+    ret += HPDF_Dict_Add (font2, local_name, font);
     ret += HPDF_Dict_Add (resource2, "Font", font2);
     ret += HPDF_Dict_Add (ap_stream, "Resources", resource2);
 
@@ -3238,9 +3183,450 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Stream_WriteStr (ap_stream->stream, "/Tx BMC\n");
     ret += HPDF_Stream_WriteStr (ap_stream->stream, "EMC\n");
 
-    ret += HPDF_Page_CreateTextFieldAnnotation (page, textField);
+    ret += HPDF_Page_CreateFieldAnnotation (page, textField);
 
     ret += HPDF_Catalog_AddInteractiveField (pdf->catalog, textField);
+
+    return ret;
+}
+
+
+/*
+ * Inserts a form signature field.
+ * Parameter:
+ * page - The Page on which the signature field should be inserted
+ * pdf - The PDF Document
+ * left, top, right, bottom - The coordinates of the signature field
+ * name - The name of the signature field
+ * print - If set, the text field will be printed when the page gets printed
+ * rotation - The rotation
+ */
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_SignatureField (HPDF_Page      page,
+                          HPDF_Doc       pdf,
+                          HPDF_REAL      left,
+                          HPDF_REAL      top,
+                          HPDF_REAL      right,
+                          HPDF_REAL      bottom,
+                          const char     *name,
+                          HPDF_BOOL      print,
+                          HPDF_INT       rotation)
+{
+    HPDF_Dict signatureField;
+    HPDF_STATUS ret;
+
+    HPDF_PTRACE((" HPDF_Page_SignatureField\n"));
+
+    signatureField = HPDF_Dict_New (page->mmgr);
+    if (!signatureField)
+        return HPDF_CheckError (page->error);
+
+    if ((ret = HPDF_Xref_Add (pdf->xref, signatureField)) != HPDF_OK)
+        return ret;
+
+    ret += HPDF_Dict_AddName (signatureField, "Type", "Annot");
+    ret += HPDF_Dict_AddName (signatureField, "Subtype", "Widget");
+
+    if (print){
+        ret += HPDF_Dict_AddNumber (signatureField, "F", 4);
+    } else {
+        ret += HPDF_Dict_AddNumber (signatureField, "F", 0);
+    }
+
+    /* Rect */
+    HPDF_Array rectArray = HPDF_Array_New (page->mmgr);
+    if (!rectArray)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddReal (rectArray, left);
+    ret += HPDF_Array_AddReal (rectArray, bottom);
+    ret += HPDF_Array_AddReal (rectArray, right);
+    ret += HPDF_Array_AddReal (rectArray, top);
+
+    ret += HPDF_Dict_Add (signatureField, "Rect", rectArray);
+
+    /* FT */
+    ret += HPDF_Dict_AddName (signatureField, "FT", "Sig");
+
+    /* T */
+    HPDF_String signatureFieldName = HPDF_String_New (page->mmgr, name, NULL);
+    if (!signatureFieldName)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (signatureField, "T", signatureFieldName);
+
+    /* MK */
+    if (rotation && rotation != 0 && (rotation % 90) == 0)
+    {
+        HPDF_Dict mk = HPDF_Dict_New (page->mmgr);
+        if (!mk)
+            return HPDF_CheckError (page->error);
+        ret += HPDF_Dict_AddNumber (mk, "R", rotation);
+        ret += HPDF_Dict_Add (signatureField, "MK", mk);
+    }
+
+    /* DA */
+    char buf[HPDF_TMP_BUF_SIZ];
+    char *pbuf = buf;
+    char *eptr = buf + HPDF_TMP_BUF_SIZ - 1;
+    HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
+
+    /* Gray Color Space */
+    pbuf = HPDF_FToA (pbuf, 0, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " g ", eptr);
+
+    pbuf = HPDF_FToA (pbuf, 0, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " Tf", eptr);
+
+    HPDF_String daValue = HPDF_String_New(page->mmgr, buf, NULL);
+    if (!daValue)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (signatureField, "DA", daValue);
+
+    /* AP - APPEARANCE DICTIONARY */
+    HPDF_Dict ap = HPDF_Dict_New (page->mmgr);
+    if (!ap)
+        return HPDF_CheckError (page->error);
+    HPDF_Dict ap_stream = HPDF_DictStream_New (page->mmgr, pdf->xref);
+    if (!ap_stream)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (ap, "N", ap_stream);
+
+    ret += HPDF_Dict_Add (signatureField, "AP", ap);
+
+    ret += HPDF_Dict_AddName (ap_stream, "Type", "XObject");
+    ret += HPDF_Dict_AddName (ap_stream, "Subtype", "Form");
+
+    /* BBOX */
+    HPDF_Array bbox = HPDF_Array_New (page->mmgr);
+    if (!bbox)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddReal (bbox, 0);
+    ret += HPDF_Array_AddReal (bbox, 0);
+    ret += HPDF_Array_AddReal (bbox, right - left);
+    ret += HPDF_Array_AddReal (bbox, top - bottom);
+    ret += HPDF_Dict_Add (ap_stream, "BBox", bbox);
+
+    ret += HPDF_Page_CreateFieldAnnotation (page, signatureField);
+
+    ret += HPDF_Catalog_AddInteractiveField (pdf->catalog, signatureField);
+
+    return ret;
+}
+
+
+/*
+ * Inserts a form checkbox field.
+ * Parameter:
+ * page - The Page on which the checkbox field should be inserted
+ * pdf - The PDF Document
+ * left, top, right, bottom - The coordinates of the checkbox field
+ * name - The name of the checkbox field
+ * print - If set, the checkbox field will be printed when the page gets printed
+ * rotation - The rotation
+ * color - The checkbox color
+ * checked - States if the checkbox should be checked
+ */
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_CheckboxField  (HPDF_Page      page,
+                          HPDF_Doc       pdf,
+                          HPDF_REAL      left,
+                          HPDF_REAL      top,
+                          HPDF_REAL      right,
+                          HPDF_REAL      bottom,
+                          const char     *name,
+                          HPDF_BOOL      print,
+                          HPDF_INT       rotation,
+                          HPDF_Color     color,
+                          HPDF_BOOL      checked)
+{
+    HPDF_Dict checkboxField;
+    HPDF_STATUS ret;
+    const char *local_name;
+
+    HPDF_PTRACE((" HPDF_Page_CheckboxField\n"));
+
+    checkboxField = HPDF_Dict_New (page->mmgr);
+    if (!checkboxField)
+        return HPDF_CheckError (page->error);
+
+    if ((ret = HPDF_Xref_Add (pdf->xref, checkboxField)) != HPDF_OK)
+        return ret;
+
+    ret += HPDF_Dict_AddName (checkboxField, "Type", "Annot");
+    ret += HPDF_Dict_AddName (checkboxField, "Subtype", "Widget");
+
+    if (print){
+        ret += HPDF_Dict_AddNumber (checkboxField, "F", 4);
+    } else {
+        ret += HPDF_Dict_AddNumber (checkboxField, "F", 0);
+    }
+
+    /* Rect */
+    HPDF_Array rectArray = HPDF_Array_New (page->mmgr);
+    if (!rectArray)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddReal (rectArray, left);
+    ret += HPDF_Array_AddReal (rectArray, bottom);
+    ret += HPDF_Array_AddReal (rectArray, right);
+    ret += HPDF_Array_AddReal (rectArray, top);
+
+    ret += HPDF_Dict_Add (checkboxField, "Rect", rectArray);
+
+    /* FT */
+    ret += HPDF_Dict_AddName (checkboxField, "FT", "Btn");
+
+    /* T */
+    HPDF_String checkboxFieldName = HPDF_String_New (page->mmgr, name, NULL);
+    if (!checkboxFieldName)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (checkboxField, "T", checkboxFieldName);
+
+    /* V and AS */
+    if (checked){
+        ret += HPDF_Dict_AddName (checkboxField, "V", "Yes");
+        ret += HPDF_Dict_AddName (checkboxField, "AS", "Yes");
+    } else {
+        ret += HPDF_Dict_AddName (checkboxField, "V", "Off");
+        ret += HPDF_Dict_AddName (checkboxField, "AS", "Off");
+    }
+
+    /* DR */
+    HPDF_Dict resource = HPDF_Dict_New (page->mmgr);
+    if (!resource)
+        return HPDF_CheckError (page->error);
+    HPDF_Dict f = HPDF_Dict_New (page->mmgr);
+    if (!f)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (checkboxField, "DR", resource);
+
+    /* DA */
+    char buf[HPDF_TMP_BUF_SIZ];
+    char *pbuf = buf;
+    char *eptr = buf + HPDF_TMP_BUF_SIZ - 1;
+    HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
+
+    if (color.cs == HPDF_CS_DEVICE_GRAY)
+    {
+        /* Gray Color Space */
+        pbuf = HPDF_FToA (pbuf, color.gray, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " g", eptr);
+    }
+    else if (color.cs == HPDF_CS_DEVICE_RGB)
+    {
+        /* RGB Color Space */
+        pbuf = HPDF_FToA (pbuf, color.rgb.r, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.rgb.g, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.rgb.b, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " rg", eptr);
+    }
+    else if (color.cs == HPDF_CS_DEVICE_CMYK)
+    {
+        /* CMYK Color Space */
+        pbuf = HPDF_FToA (pbuf, color.cmyk.c, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.m, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.y, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.k, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " k", eptr);
+    }
+    pbuf = (char *)HPDF_StrCpy (pbuf, " /ZaDb 0 Tf", eptr);
+
+    HPDF_String daValue = HPDF_String_New(page->mmgr, buf, NULL);
+    if (!daValue)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (checkboxField, "DA", daValue);
+
+
+    /* MK */
+    HPDF_Dict mk = HPDF_Dict_New (page->mmgr);
+    if (!mk)
+        return HPDF_CheckError (page->error);
+
+    // /BG
+    HPDF_Array bgArray = HPDF_Array_New (page->mmgr);
+    if (!bgArray)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddNumber (bgArray, 1);
+    ret += HPDF_Dict_Add (mk, "BG", bgArray);
+
+    // /BC
+    HPDF_Array bcArray = HPDF_Array_New (page->mmgr);
+    if (!bcArray)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddNumber (bcArray, 0);
+    ret += HPDF_Dict_Add (mk, "BC", bcArray);
+
+    // /CA
+    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, "8", NULL);
+    if (!textFieldValue)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Dict_Add (mk, "CA", textFieldValue);
+
+    if (rotation && rotation != 0 && (rotation % 90) == 0)
+    {
+        ret += HPDF_Dict_AddNumber (mk, "R", rotation);
+    }
+    ret += HPDF_Dict_Add (checkboxField, "MK", mk);
+
+    /* AP - APPEARANCE DICTIONARY */
+    HPDF_Dict ap = HPDF_Dict_New (page->mmgr);
+    if (!ap)
+        return HPDF_CheckError (page->error);
+
+    HPDF_Dict n_ap = HPDF_Dict_New (page->mmgr);
+    if (!n_ap)
+        return HPDF_CheckError (page->error);
+
+    // /Yes
+    HPDF_Dict yes_stream = HPDF_DictStream_New (page->mmgr, pdf->xref);
+    if (!yes_stream)
+        return HPDF_CheckError (page->error);
+
+    char yes_buf[HPDF_TMP_BUF_SIZ];
+    pbuf = yes_buf;
+    eptr = yes_buf + HPDF_TMP_BUF_SIZ - 1;
+    HPDF_MemSet (yes_buf, 0, HPDF_TMP_BUF_SIZ);
+
+    if (color.cs == HPDF_CS_DEVICE_GRAY)
+    {
+        /* Gray Color Space */
+        pbuf = HPDF_FToA (pbuf, color.gray, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " G", eptr);
+    }
+    else if (color.cs == HPDF_CS_DEVICE_RGB)
+    {
+        /* RGB Color Space */
+        pbuf = HPDF_FToA (pbuf, color.rgb.r, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.rgb.g, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.rgb.b, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " RG", eptr);
+    }
+    else if (color.cs == HPDF_CS_DEVICE_CMYK)
+    {
+        /* CMYK Color Space */
+        pbuf = HPDF_FToA (pbuf, color.cmyk.c, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.m, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.y, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, color.cmyk.k, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " K", eptr);
+    }
+
+
+    // Print X
+    HPDF_REAL cross_width = right - left;
+    HPDF_REAL cross_height = top - bottom;
+    HPDF_REAL cross_x_offset = 0;
+    HPDF_REAL cross_y_offset = 0;
+    if ( cross_width < cross_height )
+    {
+        cross_y_offset = ( cross_height - cross_width ) / 2;
+        cross_height = cross_width + cross_y_offset;
+    }
+    else
+    {
+        cross_x_offset = ( cross_width - cross_height ) / 2;
+        cross_width = cross_height + cross_x_offset;
+    }
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, cross_x_offset, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, cross_y_offset, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
+    pbuf = HPDF_FToA (pbuf, cross_width, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, cross_height, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " l S ", eptr);
+
+    pbuf = HPDF_FToA (pbuf, cross_x_offset, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, cross_height, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
+    pbuf = HPDF_FToA (pbuf, cross_width, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, cross_y_offset, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " l S ", eptr);
+
+    // Print Box []
+    pbuf = HPDF_FToA (pbuf, 0, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " G", eptr);
+
+    pbuf = (char *)HPDF_StrCpy (pbuf, " 2 w 0 0 m ", eptr);
+    pbuf = HPDF_FToA (pbuf, right - left, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " 0 l ", eptr);
+    pbuf = HPDF_FToA (pbuf, right - left, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, top - bottom, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " l 0 ", eptr);
+    pbuf = HPDF_FToA (pbuf, top - bottom, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " l 0 0 l S", eptr);
+
+    ret += HPDF_Stream_WriteStr (yes_stream->stream, yes_buf);
+
+    HPDF_Array yes_bbox = HPDF_Array_New (page->mmgr);
+    if (!yes_bbox)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddReal (yes_bbox, 0);
+    ret += HPDF_Array_AddReal (yes_bbox, 0);
+    ret += HPDF_Array_AddReal (yes_bbox, right - left);
+    ret += HPDF_Array_AddReal (yes_bbox, top - bottom);
+    ret += HPDF_Dict_Add (yes_stream, "BBox", yes_bbox);
+    ret += HPDF_Dict_AddName (yes_stream, "Type", "XObject");
+    ret += HPDF_Dict_AddName (yes_stream, "Subtype", "Form");
+
+    // /Off
+    HPDF_Dict off_stream = HPDF_DictStream_New (page->mmgr, pdf->xref);
+    if (!off_stream)
+        return HPDF_CheckError (page->error);
+
+    char off_buf[HPDF_TMP_BUF_SIZ];
+    pbuf = off_buf;
+    eptr = off_buf + HPDF_TMP_BUF_SIZ - 1;
+    HPDF_MemSet (off_buf, 0, HPDF_TMP_BUF_SIZ);
+
+    pbuf = HPDF_FToA (pbuf, 0, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " G", eptr);
+
+    pbuf = (char *)HPDF_StrCpy (pbuf, " 2 w 0 0 m ", eptr);
+    pbuf = HPDF_FToA (pbuf, right - left, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " 0 l ", eptr);
+    pbuf = HPDF_FToA (pbuf, right - left, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, top - bottom, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " l 0 ", eptr);
+    pbuf = HPDF_FToA (pbuf, top - bottom, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " l 0 0 l S", eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " 0 0 l S", eptr);
+    ret += HPDF_Stream_WriteStr (off_stream->stream, off_buf);
+
+    HPDF_Array off_bbox = HPDF_Array_New (page->mmgr);
+    if (!off_bbox)
+        return HPDF_CheckError (page->error);
+    ret += HPDF_Array_AddReal (off_bbox, 0);
+    ret += HPDF_Array_AddReal (off_bbox, 0);
+    ret += HPDF_Array_AddReal (off_bbox, right - left);
+    ret += HPDF_Array_AddReal (off_bbox, top - bottom);
+    ret += HPDF_Dict_Add (off_stream, "BBox", off_bbox);
+    ret += HPDF_Dict_AddName (off_stream, "Type", "XObject");
+    ret += HPDF_Dict_AddName (off_stream, "Subtype", "Form");
+
+    ret += HPDF_Dict_Add (ap, "N", n_ap);
+    ret += HPDF_Dict_Add (n_ap, "Yes", yes_stream);
+    ret += HPDF_Dict_Add (n_ap, "Off", off_stream);
+
+    ret += HPDF_Dict_Add (checkboxField, "AP", ap);
+
+    /* STREAM */
+    ret += HPDF_Page_CreateFieldAnnotation (page, checkboxField);
+
+    ret += HPDF_Catalog_AddInteractiveField (pdf->catalog, checkboxField);
 
     return ret;
 }

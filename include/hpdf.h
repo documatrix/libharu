@@ -1645,6 +1645,30 @@ HPDF_Page_TextField  (HPDF_Page            page,
                       HPDF_Color           color);
 
 HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_SignatureField (HPDF_Page      page,
+                          HPDF_Doc       pdf,
+                          HPDF_REAL      left,
+                          HPDF_REAL      top,
+                          HPDF_REAL      right,
+                          HPDF_REAL      bottom,
+                          const char     *name,
+                          HPDF_BOOL      print,
+                          HPDF_INT       rotation);
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_CheckboxField  (HPDF_Page      page,
+                          HPDF_Doc       pdf,
+                          HPDF_REAL      left,
+                          HPDF_REAL      top,
+                          HPDF_REAL      right,
+                          HPDF_REAL      bottom,
+                          const char     *name,
+                          HPDF_BOOL      print,
+                          HPDF_INT       rotation,
+                          HPDF_Color     color,
+                          HPDF_BOOL      checked);
+
+HPDF_EXPORT(HPDF_STATUS)
 HPDF_SetTextPlacementAccuracy (HPDF_Doc  pdf,
                                HPDF_UINT decimal_places);
 

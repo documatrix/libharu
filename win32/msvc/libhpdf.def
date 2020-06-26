@@ -91,6 +91,7 @@ EXPORTS
     HPDF_Page_Arc
     HPDF_Page_Arc2
     HPDF_Page_BeginText
+    HPDF_Page_CheckboxField
     HPDF_Page_Circle
     HPDF_Page_Clip
     HPDF_Page_ClosePath
@@ -192,6 +193,7 @@ EXPORTS
     HPDF_Page_ShowText
     HPDF_Page_ShowTextNextLine
     HPDF_Page_ShowTextNextLineEx
+    HPDF_Page_SignatureField
     HPDF_Page_Stroke
     HPDF_Page_TextOut
     HPDF_Page_TextRect
