@@ -62,6 +62,7 @@ EXPORTS
  HPDF_LinkAnnot_SetBorderStyle@16    = HPDF_LinkAnnot_SetBorderStyle
  HPDF_LinkAnnot_SetHighlightMode@8   = HPDF_LinkAnnot_SetHighlightMode
  HPDF_LoadJpegImageFromFile@8        = HPDF_LoadJpegImageFromFile
+ HPDF_LoadJpegImageFromMem@12        = HPDF_LoadJpegImageFromMem
  HPDF_LoadPngImageFromFile@8         = HPDF_LoadPngImageFromFile
  HPDF_LoadPngImageFromFile2@8        = HPDF_LoadPngImageFromFile2
  HPDF_LoadRawImageFromFile@20        = HPDF_LoadRawImageFromFile
