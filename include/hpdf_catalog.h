@@ -59,6 +59,9 @@ HPDF_STATUS
 HPDF_Catalog_SetPageLayout  (HPDF_Catalog      catalog,
                              HPDF_PageLayout   layout);
 
+HPDF_STATUS
+HPDF_Catalog_SetLanguage  (HPDF_Catalog  catalog,
+                           const char   *lang);
 
 HPDF_PageMode
 HPDF_Catalog_GetPageMode  (HPDF_Catalog  catalog);
@@ -88,6 +91,9 @@ HPDF_STATUS
 HPDF_Catalog_SetViewerPreference  (HPDF_Catalog   catalog,
                                    HPDF_UINT      value);
 
+HPDF_STATUS
+HPDF_Catalog_SetMarkInfo  (HPDF_Catalog catalog,
+                           HPDF_UINT    value);
 
 HPDF_BOOL
 HPDF_Catalog_Validate  (HPDF_Catalog  catalog);

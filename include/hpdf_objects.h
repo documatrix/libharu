@@ -602,6 +602,10 @@ typedef HPDF_Array HPDF_Destination;
 typedef HPDF_Dict  HPDF_U3D;
 typedef HPDF_Dict  HPDF_OutputIntent;
 typedef HPDF_Dict  HPDF_JavaScript;
+typedef HPDF_Dict  HPDF_StructureElement;
+typedef HPDF_Dict  HPDF_StructTreeRoot;
+typedef HPDF_Dict  HPDF_Artifact;
+typedef HPDF_Dict  HPDF_MarkedContent;
 
 #ifdef __cplusplus
 }

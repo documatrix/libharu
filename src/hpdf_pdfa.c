@@ -52,6 +52,8 @@
 #define PDFAID_PDFA1B            "<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/' pdfaid:part='1' pdfaid:conformance='B'/>"
 #define PDFAID_PDFA2A            "<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/' pdfaid:part='2' pdfaid:conformance='A'/>"
 #define PDFAID_PDFA2B            "<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/' pdfaid:part='2' pdfaid:conformance='B'/>"
+#define PDFUA_EXTENSION          "<rdf:Description xmlns:pdfaExtension='http://www.aiim.org/pdfa/ns/extension/' xmlns:pdfaSchema='http://www.aiim.org/pdfa/ns/schema#' xmlns:pdfaProperty='http://www.aiim.org/pdfa/ns/property#' rdf:about=''><pdfaExtension:schemas><rdf:Bag><rdf:li rdf:parseType=\"Resource\"><pdfaSchema:namespaceURI>http://www.aiim.org/pdfua/ns/id/</pdfaSchema:namespaceURI><pdfaSchema:prefix>pdfuaid</pdfaSchema:prefix><pdfaSchema:schema>PDF/UA identification schema</pdfaSchema:schema><pdfaSchema:property><rdf:Seq><rdf:li rdf:parseType=\"Resource\"><pdfaProperty:category>internal</pdfaProperty:category><pdfaProperty:description>PDF/UA version identifier</pdfaProperty:description><pdfaProperty:name>part</pdfaProperty:name><pdfaProperty:valueType>Integer</pdfaProperty:valueType></rdf:li></rdf:Seq></pdfaSchema:property></rdf:li></rdf:Bag></pdfaExtension:schemas></rdf:Description>"
+#define PDFUAID_PDFUA1           "<rdf:Description rdf:about='' xmlns:pdfuaid='http://www.aiim.org/pdfua/ns/id/' pdfuaid:part='1' />"
 #define FOOTER                   "</rdf:RDF></x:xmpmeta><?xpacket end='w'?>"
 
 
@@ -137,7 +139,9 @@ HPDF_STATUS ConvertDateToXMDate(HPDF_Stream stream, const char *pDate)
 /* Write XMP Metadata for PDF/A */
 
 HPDF_STATUS
-HPDF_PDFA_SetPDFAConformance (HPDF_Doc pdf,HPDF_PDFAType pdfatype)
+HPDF_PDFA_SetPDFAConformance (HPDF_Doc      pdf,
+                              HPDF_PDFAType pdfatype,
+                              HPDF_BOOL     pdfua)
 {
     HPDF_OutputIntent xmp;
     HPDF_STATUS ret;
@@ -152,8 +156,6 @@ HPDF_PDFA_SetPDFAConformance (HPDF_Doc pdf,HPDF_PDFAType pdfatype)
 
     const char *pdf_Keywords    = NULL;
     const char *pdf_Producer    = NULL;
-
-    const char *info = NULL;
 
     if (!HPDF_HasDoc(pdf)) {
       return HPDF_INVALID_DOCUMENT;
@@ -183,7 +185,7 @@ HPDF_PDFA_SetPDFAConformance (HPDF_Doc pdf,HPDF_PDFAType pdfatype)
         pdf->pdf_version = HPDF_VER_14;
 
         HPDF_Dict_AddName(xmp,"Type","Metadata");
-        HPDF_Dict_AddName(xmp,"SubType","XML");
+        HPDF_Dict_AddName(xmp,"Subtype","XML");
 
         ret = HPDF_OK;
         ret += HPDF_Stream_WriteStr(xmp->stream, HEADER);
@@ -273,6 +275,11 @@ HPDF_PDFA_SetPDFAConformance (HPDF_Doc pdf,HPDF_PDFAType pdfatype)
           case HPDF_PDFA_2B:
             ret += HPDF_Stream_WriteStr(xmp->stream, PDFAID_PDFA2B);
             break;
+        }
+
+        if (pdfua) {
+            ret += HPDF_Stream_WriteStr(xmp->stream, PDFUA_EXTENSION);
+            ret += HPDF_Stream_WriteStr(xmp->stream, PDFUAID_PDFUA1);
         }
 
         ret += HPDF_Stream_WriteStr(xmp->stream, FOOTER);

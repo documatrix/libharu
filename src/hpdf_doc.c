@@ -23,6 +23,7 @@
 #include "hpdf_destination.h"
 #include "hpdf_info.h"
 #include "hpdf_page_label.h"
+#include "hpdf_structure_element.h"
 #include "hpdf.h"
 
 
@@ -1976,6 +1977,24 @@ HPDF_SetPageLayout  (HPDF_Doc          pdf,
     return HPDF_OK;
 }
 
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetLanguage  (HPDF_Doc    pdf,
+                   const char *lang)
+{
+    HPDF_STATUS ret;
+
+    HPDF_PTRACE ((" HPDF_SetLanguage\n"));
+
+    if (!HPDF_HasDoc (pdf))
+        return HPDF_INVALID_DOCUMENT;
+
+    ret = HPDF_Catalog_SetLanguage (pdf->catalog, lang);
+    if (ret != HPDF_OK)
+        HPDF_CheckError (&pdf->error);
+
+    return ret;
+}
+
 HPDF_EXPORT(HPDF_PageMode)
 HPDF_GetPageMode  (HPDF_Doc   pdf)
 {
@@ -2063,6 +2082,24 @@ HPDF_SetViewerPreference  (HPDF_Doc     pdf,
     pdf->pdf_version = HPDF_VER_17;
 
     return HPDF_OK;
+}
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetMarkInfo  (HPDF_Doc  pdf,
+                   HPDF_UINT value)
+{
+    HPDF_STATUS ret;
+
+    HPDF_PTRACE ((" HPDF_SetMarkInfo\n"));
+
+    if (!HPDF_HasDoc (pdf))
+        return HPDF_INVALID_DOCUMENT;
+
+    ret = HPDF_Catalog_SetMarkInfo (pdf->catalog, value);
+    if (ret != HPDF_OK)
+        return HPDF_CheckError (&pdf->error);
+
+    return ret;
 }
 
 
@@ -2570,4 +2607,373 @@ HPDF_SetWriteFontWidths (HPDF_Doc  pdf,
     pdf->write_font_widths = write_font_widths;
 
     return HPDF_OK;
+}
+
+/*
+ * Creates a new HPDF_MarkedContent, which can be inserted using HPDF_Page_BeginMarkedContentSequence.
+ * Caller is responsible for freeing the returned object.
+ */
+HPDF_EXPORT(HPDF_MarkedContent)
+HPDF_CreateMarkedContent  (HPDF_Doc    pdf,
+                           const char *tag)
+{
+    HPDF_MarkedContent marked_content;
+
+    HPDF_PTRACE((" HPDF_CreateMarkedContent\n"));
+
+    if (!HPDF_HasDoc (pdf))
+        return NULL;
+
+    marked_content = HPDF_MarkedContent_New (pdf->mmgr, tag);
+    if (!marked_content)
+        HPDF_CheckError (&pdf->error);
+
+    return marked_content;
+}
+
+/*
+ * Creates a new HPDF_Artifact, which can be inserted using HPDF_Page_BeginArtifact.
+ * Caller is responsible for freeing the returned object.
+ */
+HPDF_EXPORT(HPDF_Artifact)
+HPDF_CreateArtifact  (HPDF_Doc          pdf,
+                      HPDF_ArtifactType type)
+{
+    HPDF_Artifact artifact;
+
+    HPDF_PTRACE((" HPDF_CreateArtifact\n"));
+
+    if (!HPDF_HasDoc (pdf))
+        return NULL;
+
+    artifact = HPDF_Artifact_New (pdf->mmgr, type);
+    if (!artifact)
+        HPDF_CheckError (&pdf->error);
+
+    return artifact;
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateStructureElement  (HPDF_Doc              pdf,
+                              HPDF_StructureType    type,
+                              HPDF_StructureElement parent)
+{
+    HPDF_StructureElement structure_element;
+
+    if (!HPDF_HasDoc (pdf))
+        return NULL;
+
+    structure_element = HPDF_StructureElement_New(pdf, type, parent);
+    if (!structure_element)
+        HPDF_CheckError (&pdf->error);
+
+    return structure_element;
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateDocument  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_DOCUMENT, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreatePart  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_PART, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateArt  (HPDF_Doc              pdf,
+                 HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_ART, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateSect  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_SECT, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateDiv  (HPDF_Doc              pdf,
+                 HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_DIV, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateBlockQuote  (HPDF_Doc              pdf,
+                        HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_BLOCK_QUOTE, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateCaption  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_CAPTION, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTOC  (HPDF_Doc              pdf,
+                 HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TOC, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTOCI  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TOCI, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateIndex  (HPDF_Doc              pdf,
+                   HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_INDEX, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateNonStruct  (HPDF_Doc              pdf,
+                       HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_NON_STRUCT, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreatePrivate  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_PRIVATE, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_HEADING, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading1  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_HEADING_1, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading2  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_HEADING_2, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading3  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_HEADING_3, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading4  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_HEADING_4, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading5  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_HEADING_5, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading6  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_HEADING_6, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateParagraph  (HPDF_Doc              pdf,
+                       HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_PARAGRAPH, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateList  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_LIST, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateListItem  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_LIST_ITEM, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateListLabel  (HPDF_Doc              pdf,
+                       HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_LIST_LABEL, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateListBody  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_LIST_BODY, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTable  (HPDF_Doc              pdf,
+                   HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TABLE, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableRow  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TABLE_ROW, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableHeaderCell  (HPDF_Doc              pdf,
+                             HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TABLE_HEADER_CELL, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableDataCell  (HPDF_Doc              pdf,
+                           HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TABLE_DATA_CELL, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableHeaderGroup  (HPDF_Doc              pdf,
+                              HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TABLE_HEADER_GROUP, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableBodyGroup  (HPDF_Doc              pdf,
+                            HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TABLE_BODY_GROUP, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableFooterGroup  (HPDF_Doc              pdf,
+                              HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_TABLE_FOOTER_GROUP, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateSpan  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_SPAN, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateQuote  (HPDF_Doc              pdf,
+                   HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_QUOTE, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateNote  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_NOTE, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateReference  (HPDF_Doc              pdf,
+                       HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_REFERENCE, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateBibEntry  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_BIB_ENTRY, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateCode  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_CODE, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateLink  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_LINK, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateAnnot  (HPDF_Doc              pdf,
+                   HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_ANNOT, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateRuby  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_RUBY, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateWarichu  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_WARICHU, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateFigure  (HPDF_Doc              pdf,
+                    HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_FIGURE, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateFormula  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_FORMULA, parent);
+}
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateForm  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent)
+{
+    return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_FORM, parent);
 }

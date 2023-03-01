@@ -240,7 +240,18 @@ Page_BeforeWrite  (HPDF_Dict    obj)
     if (attr->gmode == HPDF_GMODE_TEXT_OBJECT) {
         HPDF_PTRACE((" HPDF_Page_BeforeWrite warning text block is not end\n"));
 
+        // check if marked content needs to be stopped first
+        while (attr->marked_content_stack > attr->text_stack) {
+            if ((ret = HPDF_Page_EndMarkedContentSequence (page)) != HPDF_OK)
+                return ret;
+        }
+
         if ((ret = HPDF_Page_EndText (page)) != HPDF_OK)
+            return ret;
+    }
+
+    while (attr->marked_content_stack != 0) {
+        if ((ret = HPDF_Page_EndMarkedContentSequence (page)) != HPDF_OK)
             return ret;
     }
 
@@ -1580,6 +1591,29 @@ HPDF_Page_SetZoom  (HPDF_Page   page,
     }
 
     ret = HPDF_Dict_AddReal (page, "PZ", zoom);
+    return ret;
+}
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_SetTabOrder  (HPDF_Page         page,
+                        HPDF_PageTabOrder order)
+{
+    HPDF_STATUS ret = HPDF_OK;
+
+    HPDF_PTRACE((" HPDF_Page_SetTabOrder\n"));
+
+    if (!HPDF_Page_Validate (page)) {
+        return HPDF_INVALID_PAGE;
+    }
+
+    if (order == HPDF_PAGE_TAB_ORDER_ROW) {
+        ret = HPDF_Dict_AddName (page, "Tabs", "R");
+    } else if (order == HPDF_PAGE_TAB_ORDER_COLUMN) {
+        ret = HPDF_Dict_AddName (page, "Tabs", "C");
+    } else if (order == HPDF_PAGE_TAB_ORDER_STRUCTURE) {
+        ret = HPDF_Dict_AddName (page, "Tabs", "S");
+    }
+
     return ret;
 }
 

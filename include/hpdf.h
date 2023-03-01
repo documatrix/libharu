@@ -203,6 +203,11 @@ HPDF_SetPageLayout  (HPDF_Doc          pdf,
                      HPDF_PageLayout   layout);
 
 
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetLanguage  (HPDF_Doc    pdf,
+                   const char *lang);
+
+
 HPDF_EXPORT(HPDF_PageMode)
 HPDF_GetPageMode  (HPDF_Doc   pdf);
 
@@ -219,6 +224,11 @@ HPDF_GetViewerPreference  (HPDF_Doc   pdf);
 HPDF_EXPORT(HPDF_STATUS)
 HPDF_SetViewerPreference  (HPDF_Doc     pdf,
                            HPDF_UINT    value);
+
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetMarkInfo  (HPDF_Doc  pdf,
+                   HPDF_UINT value);
 
 
 HPDF_EXPORT(HPDF_STATUS)
@@ -265,6 +275,10 @@ HPDF_Page_SetRotate  (HPDF_Page     page,
 HPDF_EXPORT(HPDF_STATUS)
 HPDF_Page_SetZoom  (HPDF_Page     page,
                     HPDF_REAL     zoom);
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_SetTabOrder  (HPDF_Page         page,
+                        HPDF_PageTabOrder order);
 
 /*---------------------------------------------------------------------------*/
 /*----- font handling -------------------------------------------------------*/
@@ -1539,6 +1553,166 @@ HPDF_Page_Insert_Shared_Content_Stream  (HPDF_Page page,
 /* EMC --not implemented yet */
 /* MP --not implemented yet */
 /* DP --not implemented yet */
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_BeginStructureElementReference  (HPDF_Page             page,
+                                           HPDF_StructureElement structure_element);
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_BeginArtifact  (HPDF_Page     page,
+                          HPDF_Artifact artifact);
+
+/* BMC */
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_BeginMarkedContentSequence  (HPDF_Page          page,
+                                       HPDF_MarkedContent marked_content);
+
+/* EMC */
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_EndMarkedContentSequence  (HPDF_Page page);
+
+/*----- structure elements -----------------------------------------------*/
+
+HPDF_EXPORT(HPDF_MarkedContent)
+HPDF_CreateMarkedContent  (HPDF_Doc    doc,
+                           const char *tag);
+
+HPDF_EXPORT(HPDF_Artifact)
+HPDF_CreateArtifact  (HPDF_Doc          doc,
+                      HPDF_ArtifactType type);
+
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateDocument  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreatePart  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateArt  (HPDF_Doc              pdf,
+                 HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateSect  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateDiv  (HPDF_Doc              pdf,
+                 HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateBlockQuote  (HPDF_Doc              pdf,
+                        HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateCaption  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTOC  (HPDF_Doc              pdf,
+                 HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTOCI  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateIndex  (HPDF_Doc              pdf,
+                   HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateNonStruct  (HPDF_Doc              pdf,
+                       HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreatePrivate  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading1  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading2  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading3  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading4  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading5  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateHeading6  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateParagraph  (HPDF_Doc              pdf,
+                       HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateList  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateListItem  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateListLabel  (HPDF_Doc              pdf,
+                       HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateListBody  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTable  (HPDF_Doc              pdf,
+                   HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableRow  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableHeaderCell  (HPDF_Doc              pdf,
+                             HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableDataCell  (HPDF_Doc              pdf,
+                           HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableHeaderGroup  (HPDF_Doc              pdf,
+                              HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableBodyGroup  (HPDF_Doc              pdf,
+                            HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateTableFooterGroup  (HPDF_Doc              pdf,
+                              HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateSpan  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateQuote  (HPDF_Doc              pdf,
+                   HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateNote  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateReference  (HPDF_Doc              pdf,
+                       HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateBibEntry  (HPDF_Doc              pdf,
+                      HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateCode  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateLink  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateAnnot  (HPDF_Doc              pdf,
+                   HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateRuby  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateWarichu  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateFigure  (HPDF_Doc              pdf,
+                    HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateFormula  (HPDF_Doc              pdf,
+                     HPDF_StructureElement parent);
+HPDF_EXPORT(HPDF_StructureElement)
+HPDF_CreateForm  (HPDF_Doc              pdf,
+                  HPDF_StructureElement parent);
 
 /*--- Compatibility ------------------------------------------------------*/
 

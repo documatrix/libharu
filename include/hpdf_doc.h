@@ -49,6 +49,8 @@ typedef struct _HPDF_Doc_Rec {
     HPDF_Dict         info;
     HPDF_Dict         trailer;
 
+    HPDF_StructTreeRoot struct_tree_root;
+
     HPDF_List         font_mgr;
     HPDF_BYTE         ttfont_tag[6];
 

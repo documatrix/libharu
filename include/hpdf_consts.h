@@ -107,7 +107,14 @@
 #define HPDF_SIMPLEX              64
 #define HPDF_DUPLEX_FLIP_SHORT    128
 #define HPDF_DUPLEX_FLIP_LONG     256
+#define HPDF_DISPLAY_DOC_TITLE    512
 
+/*----------------------------------------------------------------------------*/
+/*------ mark info definitions -----------------------------------------------*/
+
+#define HPDF_MARK_INFO_MARKED           1
+#define HPDF_MARK_INFO_USER_PROPERTIES  2
+#define HPDF_MARK_INFO_SUSPECTS         4
 
 /*---------------------------------------------------------------------------*/
 /*------ limitation of object implementation (PDF1.4) -----------------------*/

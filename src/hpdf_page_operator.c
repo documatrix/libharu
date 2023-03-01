@@ -18,6 +18,7 @@
 #include "hpdf_conf.h"
 #include "hpdf_utils.h"
 #include "hpdf_pages.h"
+#include "hpdf_structure_element.h"
 #include "hpdf.h"
 
 static const HPDF_Point INIT_POS = {0, 0};
@@ -44,7 +45,13 @@ InternalShowTextNextLine  (HPDF_Page    page,
                            const char  *text,
                            HPDF_UINT    len);
 
+static HPDF_STATUS
+InternalBeginMarkedContentSequence  (HPDF_Page   page,
+                                     const char *tag,
+                                     HPDF_Dict   props);
 
+static HPDF_UINT
+InternalOperatorStackSize  (HPDF_Page page);
 
 /*--- General graphics state ---------------------------------------------*/
 
@@ -980,6 +987,7 @@ HPDF_Page_BeginText  (HPDF_Page  page)
     attr->gmode = HPDF_GMODE_TEXT_OBJECT;
     attr->text_pos = INIT_POS;
     attr->text_matrix = INIT_MATRIX;
+    attr->text_stack = InternalOperatorStackSize (page) + 1;
 
     return ret;
 }
@@ -998,11 +1006,15 @@ HPDF_Page_EndText  (HPDF_Page  page)
 
     attr = (HPDF_PageAttr)page->attr;
 
+    if (attr->text_stack <= attr->marked_content_stack)
+        return HPDF_RaiseError (page->error, HPDF_PAGE_INVALID_OPERATOR_STACK, 0);
+
     if (HPDF_Stream_WriteStr (attr->stream, "ET\012") != HPDF_OK)
         return HPDF_CheckError (page->error);
 
     attr->text_pos = INIT_POS;
     attr->gmode = HPDF_GMODE_PAGE_DESCRIPTION;
+    attr->text_stack = 0;
 
     return ret;
 }
@@ -1892,6 +1904,150 @@ HPDF_Page_ExecuteXObject  (HPDF_Page     page,
 /* EMC --not implemented yet */
 /* MP --not implemented yet */
 /* DP --not implemented yet */
+
+/* BDC */
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_BeginStructureElementReference  (HPDF_Page             page,
+                                           HPDF_StructureElement structure_element)
+{
+    HPDF_PageAttr attr;
+    HPDF_Name structure_type;
+    HPDF_STATUS ret;
+
+    HPDF_PTRACE ((" HPDF_Page_BeginReferenceToStructureElement\n"));
+
+    attr = (HPDF_PageAttr)page->attr;
+
+    structure_type = (HPDF_Name)HPDF_Dict_GetItem (structure_element, "S", HPDF_OCLASS_NAME);
+    if (!structure_type)
+        return HPDF_RaiseError (page->error, HPDF_INVALID_OBJECT, 0);
+
+    HPDF_UINT marked_content_id = attr->marked_content_id;
+    attr->marked_content_id++;
+
+    HPDF_Dict props = HPDF_Dict_New (page->mmgr);
+    if (!props)
+        return HPDF_Error_GetCode (page->error);
+
+    ret = HPDF_Dict_AddNumber (props, "MCID", marked_content_id);
+    if (ret != HPDF_OK) {
+        HPDF_Dict_Free (props);
+        return ret;
+    }
+
+    // output begin of marked content sequence e.g. /Document << MCID 0 >> BDC
+    ret = InternalBeginMarkedContentSequence (page, HPDF_Name_GetValue (structure_type), props);
+    HPDF_Dict_Free (props);
+    if (ret != HPDF_OK)
+        return ret;
+
+    ret = HPDF_StructureElement_AddMarkedContentSequence (structure_element, marked_content_id, page);
+    if (ret != HPDF_OK)
+        return ret;
+
+    // handle parent tree
+    HPDF_Array parent_tree_entry = attr->parent_tree_entry;
+    if (!parent_tree_entry) {
+        parent_tree_entry = HPDF_Array_New (page->mmgr);
+        if (!parent_tree_entry)
+            return HPDF_Error_GetCode (page->error);
+
+        HPDF_StructureElementAttr se_attr = (HPDF_StructureElementAttr)structure_element->attr;
+        HPDF_UINT32 parent_tree_key = HPDF_StructTreeRoot_AddParentTreeEntry (se_attr->struct_tree_root, parent_tree_entry);
+        if (!parent_tree_key)
+            return HPDF_Error_GetCode (page->error);
+
+        ret = HPDF_Dict_AddNumber (page, "StructParents", parent_tree_key);
+        if (ret != HPDF_OK)
+            return ret;
+
+        attr->parent_tree_entry = parent_tree_entry;
+    }
+
+    ret = HPDF_Array_Add (parent_tree_entry, structure_element);
+    if (ret != HPDF_OK)
+        return ret;
+
+    return HPDF_OK;
+}
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_BeginArtifact  (HPDF_Page     page,
+                          HPDF_Artifact artifact)
+{
+    return InternalBeginMarkedContentSequence (page, "Artifact", artifact);
+}
+
+/* BMC / BDC */
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_BeginMarkedContentSequence  (HPDF_Page          page,
+                                       HPDF_MarkedContent marked_content)
+{
+    HPDF_MarkedContentAttr attr = (HPDF_MarkedContentAttr)marked_content->attr;
+
+    return InternalBeginMarkedContentSequence (page, attr->tag, marked_content);
+}
+
+HPDF_STATUS
+InternalBeginMarkedContentSequence  (HPDF_Page   page,
+                                     const char *tag,
+                                     HPDF_Dict   props)
+{
+    HPDF_PageAttr attr = (HPDF_PageAttr)page->attr;
+
+    if (HPDF_Stream_WriteEscapeName (attr->stream, tag) != HPDF_OK)
+        return HPDF_CheckError (page->error);
+
+    if (props != NULL) {
+        if (HPDF_Dict_Write (props, attr->stream, NULL) != HPDF_OK)
+            return HPDF_CheckError (page->error);
+
+        if (HPDF_Stream_WriteStr (attr->stream, " BDC\012") != HPDF_OK)
+            return HPDF_CheckError (page->error);
+    } else {
+        if (HPDF_Stream_WriteStr (attr->stream, " BMC\012") != HPDF_OK)
+            return HPDF_CheckError (page->error);
+    }
+
+    attr->marked_content_stack = InternalOperatorStackSize (page) + 1;
+
+    return HPDF_OK;
+}
+
+/* EMC */
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_EndMarkedContentSequence (HPDF_Page page)
+{
+    HPDF_PTRACE ((" HPDF_Page_EndStructureElementReference\n"));
+
+    HPDF_STATUS ret = HPDF_Page_CheckState (page, HPDF_GMODE_PAGE_DESCRIPTION | HPDF_GMODE_TEXT_OBJECT);
+    if (ret != HPDF_OK)
+        return ret;
+
+    HPDF_PageAttr attr = (HPDF_PageAttr)page->attr;
+    if (attr->marked_content_stack <= attr->text_stack)
+        return HPDF_RaiseError (page->error, HPDF_PAGE_INVALID_OPERATOR_STACK, 0);
+
+    if (HPDF_Stream_WriteStr (attr->stream, "EMC\012") != HPDF_OK)
+        return HPDF_CheckError (page->error);
+
+    attr->marked_content_stack--;
+    if (attr->marked_content_stack != 0 && attr->marked_content_stack == attr->text_stack)
+        attr->marked_content_stack--;
+
+    return HPDF_OK;
+}
+
+static HPDF_UINT
+InternalOperatorStackSize  (HPDF_Page page)
+{
+    HPDF_PageAttr attr = (HPDF_PageAttr)page->attr;
+    if (attr->marked_content_stack > attr->text_stack) {
+        return attr->marked_content_stack;
+    } else {
+        return attr->text_stack;
+    }
+}
 
 /*--- Compatibility ------------------------------------------------------*/
 

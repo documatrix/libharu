@@ -41,6 +41,8 @@ static const char * const HPDF_PAGE_MODE_NAMES[] = {
                         NULL
 };
 
+static void
+Catalog_OnFree  (HPDF_Dict obj);
 
 HPDF_Catalog
 HPDF_Catalog_New  (HPDF_MMgr  mmgr,
@@ -55,6 +57,7 @@ HPDF_Catalog_New  (HPDF_MMgr  mmgr,
         return NULL;
 
     catalog->header.obj_class |= HPDF_OSUBCLASS_CATALOG;
+    catalog->free_fn = Catalog_OnFree;
 
     if (HPDF_Xref_Add (xref, catalog) != HPDF_OK)
         return NULL;
@@ -65,7 +68,6 @@ HPDF_Catalog_New  (HPDF_MMgr  mmgr,
 
     attr = HPDF_GetMem (mmgr, sizeof(HPDF_CatalogAttr_Rec));
     if (!attr) {
-        HPDF_Dict_Free (catalog);
         return NULL;
     }
 
@@ -78,6 +80,17 @@ HPDF_Catalog_New  (HPDF_MMgr  mmgr,
     return catalog;
 }
 
+static void
+Catalog_OnFree  (HPDF_Dict obj)
+{
+    HPDF_CatalogAttr attr = (HPDF_CatalogAttr)obj->attr;
+
+    HPDF_PTRACE((" HPDF_Catalog_OnFree\n"));
+
+    if (attr) {
+        HPDF_FreeMem (obj->mmgr, attr);
+    }
+}
 
 HPDF_Pages
 HPDF_Catalog_GetRoot  (HPDF_Catalog  catalog)
@@ -142,7 +155,12 @@ HPDF_Catalog_SetPageLayout  (HPDF_Catalog      catalog,
                     HPDF_PAGE_LAYOUT_NAMES[(HPDF_INT)layout]);
 }
 
-
+HPDF_STATUS
+HPDF_Catalog_SetLanguage  (HPDF_Catalog  catalog,
+                           const char   *lang)
+{
+    return HPDF_Dict_Add (catalog, "Lang", HPDF_String_New (catalog->mmgr, lang, NULL));
+}
 
 
 HPDF_PageMode
@@ -244,6 +262,60 @@ HPDF_Catalog_AddPageLabel  (HPDF_Catalog   catalog,
 }
 
 HPDF_STATUS
+HPDF_Catalog_SetMarkInfo  (HPDF_Catalog catalog,
+                           HPDF_UINT    value)
+{
+    HPDF_STATUS ret;
+    HPDF_Dict mark_info;
+
+    HPDF_PTRACE ((" HPDF_Catalog_SetMarkInfo\n"));
+
+    if (!value) {
+        ret = HPDF_Dict_RemoveElement (catalog, "MarkInfo");
+        if (ret == HPDF_DICT_ITEM_NOT_FOUND)
+            ret = HPDF_OK;
+
+        return ret;
+    }
+
+    mark_info = HPDF_Dict_New (catalog->mmgr);
+    if (!mark_info)
+        return catalog->error->error_no;
+
+    if ((ret = HPDF_Dict_Add (catalog, "MarkInfo", mark_info)) != HPDF_OK)
+        return ret;
+
+    if (value & HPDF_MARK_INFO_MARKED) {
+        if ((ret = HPDF_Dict_AddBoolean (mark_info, "Marked", HPDF_TRUE)) != HPDF_OK)
+            return ret;
+    } else {
+        if ((ret = HPDF_Dict_RemoveElement (mark_info, "Marked")) != HPDF_OK)
+            if (ret != HPDF_DICT_ITEM_NOT_FOUND)
+                return ret;
+    }
+
+    if (value & HPDF_MARK_INFO_USER_PROPERTIES) {
+        if ((ret = HPDF_Dict_AddBoolean (mark_info, "UserProperties", HPDF_TRUE)) != HPDF_OK)
+            return ret;
+    } else {
+        if ((ret = HPDF_Dict_RemoveElement (mark_info, "UserProperties")) != HPDF_OK)
+            if (ret != HPDF_DICT_ITEM_NOT_FOUND)
+                return ret;
+    }
+
+    if (value & HPDF_MARK_INFO_SUSPECTS) {
+        if ((ret = HPDF_Dict_AddBoolean (mark_info, "Suspects", HPDF_TRUE)) != HPDF_OK)
+            return ret;
+    } else {
+        if ((ret = HPDF_Dict_RemoveElement (mark_info, "Suspects")) != HPDF_OK)
+            if (ret != HPDF_DICT_ITEM_NOT_FOUND)
+                return ret;
+    }
+
+    return HPDF_OK;
+}
+
+HPDF_STATUS
 HPDF_Catalog_SetViewerPreference  (HPDF_Catalog   catalog,
                                    HPDF_UINT      value)
 {
@@ -333,6 +405,15 @@ HPDF_Catalog_SetViewerPreference  (HPDF_Catalog   catalog,
     } else {
         if ((ret = HPDF_Dict_RemoveElement (preferences, "PrintScaling")) !=
                 HPDF_OK)
+            if (ret != HPDF_DICT_ITEM_NOT_FOUND)
+                return ret;
+    }
+
+    if (value & HPDF_DISPLAY_DOC_TITLE) {
+        if ((ret = HPDF_Dict_AddBoolean (preferences, "DisplayDocTitle", HPDF_TRUE)) != HPDF_OK)
+            return ret;
+    } else {
+        if ((ret = HPDF_Dict_RemoveElement (preferences, "DisplayDocTitle")) != HPDF_OK)
             if (ret != HPDF_DICT_ITEM_NOT_FOUND)
                 return ret;
     }
