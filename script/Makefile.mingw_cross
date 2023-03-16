@@ -85,6 +85,7 @@ OBJS = \
 	src/hpdf_exdata.o \
 	src/hpdf_namedict.o \
 	src/hpdf_u3d.o \
+	src/hpdf_structure_element.o \
 
 PROGRAMS = \
 	demo/encoding_list.exe \

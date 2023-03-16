@@ -90,12 +90,12 @@ AS_VAR_POPDEF([_OUT])dnl
 ],[PACKAGE="$PACKAGE"])])
 dnl }}}
 
-AC_PREREQ(2.60)
+AC_PREREQ([2.60])
 
 AC_INIT([libhpdf],[2.4.0dev])
 AC_CONFIG_SRCDIR([README])
 AC_CONFIG_SRCDIR(include/hpdf.h)
-AC_CONFIG_HEADER(include/config.h)
+AC_CONFIG_HEADERS([include/config.h])
 AX_PREFIX_CONFIG_H(include/hpdf_config.h)
 AM_INIT_AUTOMAKE([no-define])
 AM_MAINTAINER_MODE

@@ -66,6 +66,10 @@ typedef struct _HPDF_PageAttr_Rec {
     HPDF_Xref          xref;
     HPDF_UINT          compression_mode;
     HPDF_UINT          text_placement_accuracy;
+    HPDF_UINT          text_stack;
+    HPDF_UINT          marked_content_stack;
+    HPDF_UINT          marked_content_id;
+    HPDF_Array         parent_tree_entry;
     HPDF_PDFVer       *ver;
 } HPDF_PageAttr_Rec;
 

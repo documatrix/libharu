@@ -65,6 +65,7 @@ set(
 	hpdf_3dmeasure.c
 	hpdf_exdata.c
 	hpdf_encoder_utf.c
+	hpdf_structure_element.c
 )
 
 # =======================================================================
