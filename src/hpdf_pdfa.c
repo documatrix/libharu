@@ -263,6 +263,8 @@ HPDF_PDFA_SetPDFAConformance (HPDF_Doc      pdf,
 
         /* Add the pdfaid block */
         switch(pdfatype) {
+          case HPDF_PDFA_NONE:
+            break;
           case HPDF_PDFA_1A:
             ret += HPDF_Stream_WriteStr(xmp->stream, PDFAID_PDFA1A);
             break;
