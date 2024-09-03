@@ -123,6 +123,11 @@ HPDF_Page_SetFilter  (HPDF_Page    page,
                       HPDF_UINT    filter);
 
 
+void
+HPDF_Page_SetTextPlacementAccuracy  (HPDF_Page    page,
+                                     HPDF_UINT decimal_places);
+
+
 HPDF_STATUS
 HPDF_Page_CheckState  (HPDF_Page  page,
                        HPDF_UINT  mode);

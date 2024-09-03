@@ -25,6 +25,7 @@
 #include "hpdf_page_label.h"
 #include "hpdf_structure_element.h"
 #include "hpdf.h"
+#include <string.h>
 
 
 static const char * const HPDF_VERSION_STR[6] = {
