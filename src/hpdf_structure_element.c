@@ -336,6 +336,57 @@ HPDF_StructureElement_AddMarkedContentSequence  (HPDF_StructureElement structure
 }
 
 HPDF_STATUS
+HPDF_StructureElement_SetObjectReference (HPDF_StructureElement structure_element,
+                                         HPDF_Page             page,
+                                         HPDF_Annotation       annot)
+{
+    HPDF_Array children;
+    HPDF_STATUS ret;
+
+    HPDF_PTRACE((" HPDF_StructureElement_SetObjectReference\n"));
+
+    HPDF_Dict objr = HPDF_Dict_New (structure_element->mmgr);
+    if (!objr)
+        return HPDF_Error_GetCode (structure_element->error);
+
+    if ((ret = HPDF_Dict_AddName (objr, "Type", "OBJR")) != HPDF_OK)
+        return ret;
+
+    if ((ret = HPDF_Dict_Add (objr, "Pg", page)) != HPDF_OK)
+        return ret;
+
+    if ((ret = HPDF_Dict_Add (objr, "Obj", annot)) != HPDF_OK)
+        return ret;
+
+    children = (HPDF_Array)HPDF_Dict_GetItem (structure_element, "K", HPDF_OCLASS_ARRAY);
+    if (!children) {
+        children = HPDF_Array_New (structure_element->mmgr);
+        if (!children)
+            return HPDF_Error_GetCode (structure_element->error);
+
+        if ((ret = HPDF_Dict_Add (structure_element, "K", children)) != HPDF_OK)
+            return ret;
+    }
+    ret = HPDF_Array_Add (children, objr);
+    if (ret != HPDF_OK)
+        return ret;
+
+    if (ret != HPDF_OK)
+        return ret;
+
+    HPDF_StructureElementAttr se_attr = (HPDF_StructureElementAttr)structure_element->attr;
+    HPDF_UINT32 parent_tree_key = HPDF_StructTreeRoot_AddParentTreeEntry (se_attr->struct_tree_root, structure_element);
+    if (!parent_tree_key)
+        return HPDF_Error_GetCode (annot->error);
+
+    ret = HPDF_Dict_AddNumber (annot, "StructParent", parent_tree_key);
+    if (ret != HPDF_OK)
+        return ret;
+
+    return ret;
+}
+
+HPDF_STATUS
 HPDF_StructureElement_SetAlternateText  (HPDF_StructureElement  structure_element,
                                          const char            *alt,
                                          HPDF_UINT16            unicode_len)

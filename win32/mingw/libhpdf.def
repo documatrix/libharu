@@ -240,6 +240,7 @@ EXPORTS
  HPDF_SetMarkInfo@8                         = HPDF_SetMarkInfo
  HPDF_Page_SetTabOrder@8                    = HPDF_Page_SetTabOrder
  HPDF_Page_BeginStructureElementReference@8 = HPDF_Page_BeginStructureElementReference
+ HPDF_StructureElement_SetObjectReference@12= HPDF_StructureElement_SetObjectReference
  HPDF_Page_BeginArtifact@8                  = HPDF_Page_BeginArtifact
  HPDF_Page_BeginMarkedContentSequence@8     = HPDF_Page_BeginMarkedContentSequence
  HPDF_Page_EndMarkedContentSequence@4       = HPDF_Page_EndMarkedContentSequence
