@@ -61,7 +61,8 @@ CidRangeToHex (char        *s,
 
 static HPDF_Dict
 CreateCMap  (HPDF_Encoder   encoder,
-             HPDF_Xref      xref);
+             HPDF_Xref      xref,
+             HPDF_BOOL      utf_entity_h_to_unicode);
 
 
 static void
@@ -149,14 +150,14 @@ HPDF_Type0Font_New  (HPDF_MMgr        mmgr,
 	 */
         if (HPDF_StrCmp(encoder_attr->ordering, "Identity-H") == 0) {
 	    ret += HPDF_Dict_AddName (font, "Encoding", "Identity-H");
-	    attr->cmap_stream = CreateCMap (encoder, xref);
+	    attr->cmap_stream = CreateCMap (encoder, xref, HPDF_TRUE);
 
 	    if (attr->cmap_stream) {
 	        ret += HPDF_Dict_Add (font, "ToUnicode", attr->cmap_stream);
 	    } else
 	        return NULL;
 	} else {
-            attr->cmap_stream = CreateCMap (encoder, xref);
+            attr->cmap_stream = CreateCMap (encoder, xref, HPDF_FALSE);
 
 	    if (attr->cmap_stream) {
 	        ret += HPDF_Dict_Add (font, "Encoding", attr->cmap_stream);
@@ -863,7 +864,8 @@ CidRangeToHex  (char        *s,
 
 static HPDF_Dict
 CreateCMap  (HPDF_Encoder   encoder,
-             HPDF_Xref      xref)
+             HPDF_Xref      xref,
+             HPDF_BOOL      utf_entity_h_to_unicode)
 {
     HPDF_STATUS ret = HPDF_OK;
     HPDF_Dict cmap = HPDF_DictStream_New (encoder->mmgr, xref);
@@ -1066,8 +1068,21 @@ CreateCMap  (HPDF_Encoder   encoder,
             return NULL;
     }
 
+    pbuf = buf;
     if (odd > 0)
-        pbuf = (char *)HPDF_StrCpy (buf, "endcidrange\r\n", eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, "endcidrange\r\n", eptr);
+
+    if (utf_entity_h_to_unicode) {
+        // A CMap used in the /ToUnicode entry of a font must use the beginbfchar, endbfchar,
+        // beginbfrange, and endbfrange operators to define the mapping from character codes
+        // to Unicode character sequences expressed in UTF-16BE encoding.
+        // Since we currently only use the /ToUnicode entry for Type0 fonts with
+        // "Identity-H" encoding created with the UTF-8 encoder, the character codes
+        // are already UTF-16BE encoded and we can just the following static mapping.
+        pbuf = (char *)HPDF_StrCpy (pbuf, "1 beginbfrange\r\n", eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, "<0000> <FFFF> <0000>\r\n", eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, "endbfrange\r\n", eptr);
+    }
 
     pbuf = (char *)HPDF_StrCpy (pbuf, "endcmap\r\n", eptr);
     pbuf = (char *)HPDF_StrCpy (pbuf, "CMapName currentdict /CMap "
