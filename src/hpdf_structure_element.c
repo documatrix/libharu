@@ -336,10 +336,9 @@ HPDF_StructureElement_AddMarkedContentSequence  (HPDF_StructureElement structure
 }
 
 HPDF_STATUS
-HPDF_StructureElement_SetObjectReference (HPDF_StructureElement structure_element,
-                                          HPDF_Page             page,
-                                          HPDF_Annotation       annot,
-                                          const char           *content)
+HPDF_StructureElement_AddObjectReference (HPDF_StructureElement structure_element,
+                                          HPDF_Dict             obj,
+                                          HPDF_Page             page)
 {
     HPDF_Array children;
     HPDF_STATUS ret;
@@ -356,7 +355,7 @@ HPDF_StructureElement_SetObjectReference (HPDF_StructureElement structure_elemen
     if ((ret = HPDF_Dict_Add (objr, "Pg", page)) != HPDF_OK)
         return ret;
 
-    if ((ret = HPDF_Dict_Add (objr, "Obj", annot)) != HPDF_OK)
+    if ((ret = HPDF_Dict_Add (objr, "Obj", obj)) != HPDF_OK)
         return ret;
 
     children = (HPDF_Array)HPDF_Dict_GetItem (structure_element, "K", HPDF_OCLASS_ARRAY);
@@ -372,19 +371,12 @@ HPDF_StructureElement_SetObjectReference (HPDF_StructureElement structure_elemen
     if (ret != HPDF_OK)
         return ret;
 
-    if (ret != HPDF_OK)
-        return ret;
-
     HPDF_StructureElementAttr se_attr = (HPDF_StructureElementAttr)structure_element->attr;
     HPDF_UINT32 parent_tree_key = HPDF_StructTreeRoot_AddParentTreeEntry (se_attr->struct_tree_root, structure_element);
     if (!parent_tree_key)
-        return HPDF_Error_GetCode (annot->error);
+        return HPDF_Error_GetCode (obj->error);
 
-    ret = HPDF_Dict_AddNumber (annot, "StructParent", parent_tree_key);
-    if (ret != HPDF_OK)
-        return ret;
-
-    ret += HPDF_Dict_Add (annot, "Contents", HPDF_String_New (annot->mmgr, content, NULL));
+    ret = HPDF_Dict_AddNumber (obj, "StructParent", parent_tree_key);
     if (ret != HPDF_OK)
         return ret;
 

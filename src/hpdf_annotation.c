@@ -223,6 +223,25 @@ HPDF_Annotation_SetBorderStyle  (HPDF_Annotation  annot,
     return HPDF_OK;
 }
 
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Annotation_SetContents  (HPDF_Annotation  annot,
+                              const char      *contents,
+                              HPDF_Encoder     encoder)
+{
+    HPDF_String s;
+    HPDF_STATUS ret;
+
+    HPDF_PTRACE((" HPDF_Annotation_SetContents\n"));
+
+    s = HPDF_String_New (annot->mmgr, contents, encoder);
+    if (!s)
+        return HPDF_Error_GetCode (annot->error);
+
+    ret = HPDF_Dict_Add (annot, "Contents", s);
+
+    return ret;
+}
+
 HPDF_Annotation
 HPDF_WidgetAnnot_New (HPDF_MMgr         mmgr,
                      HPDF_Xref         xref,
