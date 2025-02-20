@@ -730,6 +730,11 @@ HPDF_Annotation_SetBorderStyle  (HPDF_Annotation  annot,
                                  HPDF_UINT16      dash_phase);
 
 HPDF_EXPORT(HPDF_STATUS)
+HPDF_Annotation_SetContents  (HPDF_Annotation  annot,
+                              const char      *contents,
+                              HPDF_Encoder     encoder);
+
+HPDF_EXPORT(HPDF_STATUS)
 HPDF_ProjectionAnnot_SetExData(HPDF_Annotation annot, HPDF_ExData exdata);
 
 

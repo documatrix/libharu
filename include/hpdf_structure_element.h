@@ -49,10 +49,9 @@ HPDF_StructureElement_AddMarkedContentSequence  (HPDF_StructureElement structure
                                                  HPDF_Page             page);
 
 HPDF_STATUS
-HPDF_StructureElement_SetObjectReference (HPDF_StructureElement structure_element,
-                                          HPDF_Page             page,
-                                          HPDF_Annotation       annot,
-                                          const char           *content);
+HPDF_StructureElement_AddObjectReference (HPDF_StructureElement structure_element,
+                                          HPDF_Dict             obj,
+                                          HPDF_Page             page);
 
 HPDF_STATUS
 HPDF_StructureElement_SetAlternateText  (HPDF_StructureElement  structure_element,

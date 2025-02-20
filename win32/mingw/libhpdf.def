@@ -59,6 +59,7 @@ EXPORTS
  HPDF_Image_SetMask@8                = HPDF_Image_SetMask
  HPDF_InsertPage@8                   = HPDF_InsertPage
  HPDF_Annotation_SetFlags@8          = HPDF_Annotation_SetFlags
+ HPDF_Annotation_SetContents@24      = HPDF_Annotation_SetContents
  HPDF_LinkAnnot_SetBorderStyle@16    = HPDF_LinkAnnot_SetBorderStyle
  HPDF_LinkAnnot_SetHighlightMode@8   = HPDF_LinkAnnot_SetHighlightMode
  HPDF_LoadJpegImageFromFile@8        = HPDF_LoadJpegImageFromFile
@@ -240,7 +241,6 @@ EXPORTS
  HPDF_SetMarkInfo@8                         = HPDF_SetMarkInfo
  HPDF_Page_SetTabOrder@8                    = HPDF_Page_SetTabOrder
  HPDF_Page_BeginStructureElementReference@8 = HPDF_Page_BeginStructureElementReference
- HPDF_StructureElement_SetObjectReference@16= HPDF_StructureElement_SetObjectReference
  HPDF_Page_BeginArtifact@8                  = HPDF_Page_BeginArtifact
  HPDF_Page_BeginMarkedContentSequence@8     = HPDF_Page_BeginMarkedContentSequence
  HPDF_Page_EndMarkedContentSequence@4       = HPDF_Page_EndMarkedContentSequence
@@ -294,6 +294,7 @@ EXPORTS
  HPDF_StructureElement_SetActualText@12     = HPDF_StructureElement_SetActualText
  HPDF_StructureElement_SetBBox@8            = HPDF_StructureElement_SetBBox
  HPDF_StructureElement_SetPlacement@8       = HPDF_StructureElement_SetPlacement
+ HPDF_StructureElement_AddObjectReference@24 = HPDF_StructureElement_AddObjectReference
  HPDF_TableHeaderCell_SetScope@8            = HPDF_TableHeaderCell_SetScope
  HPDF_Artifact_SetSubtype@8                 = HPDF_Artifact_SetSubtype
  HPDF_MarkedContent_SetAlternateText@12     = HPDF_MarkedContent_SetAlternateText
