@@ -368,6 +368,56 @@ HPDF_Page_New  (HPDF_MMgr   mmgr,
     return page;
 }
 
+/*
+ * HPDF_Page_New_Fake creates a "fake" page that can be used to utilize the
+ * hpdf_page_operator.c functions to write to a stream that is not associated
+ * with a page (e.g. an appearance stream).
+ * It uses the given contents dictionary as the page content/stream.
+ * The page is not added to the xref and must be freed manually.
+ */
+HPDF_Page
+HPDF_Page_New_Fake  (HPDF_MMgr   mmgr,
+                     HPDF_Xref   xref,
+                     HPDF_Dict   contents)
+{
+    HPDF_PageAttr attr;
+    HPDF_Page page;
+
+    HPDF_PTRACE((" HPDF_Page_New_Fake\n"));
+
+    page = HPDF_Dict_New (mmgr);
+    if (!page)
+        return NULL;
+
+    page->header.obj_class |= HPDF_OSUBCLASS_PAGE;
+    page->free_fn = Page_OnFree;
+    page->before_write_fn = Page_BeforeWrite;
+
+    attr = HPDF_GetMem (page->mmgr, sizeof(HPDF_PageAttr_Rec));
+    if (!attr) {
+        HPDF_Dict_Free (page);
+        return NULL;
+    }
+
+    page->attr = attr;
+    HPDF_MemSet (attr, 0, sizeof(HPDF_PageAttr_Rec));
+    attr->gmode = HPDF_GMODE_PAGE_DESCRIPTION;
+    attr->cur_pos = HPDF_ToPoint (0, 0);
+    attr->text_pos = HPDF_ToPoint (0, 0);
+
+    attr->gstate = HPDF_GState_New (page->mmgr, NULL);
+    attr->contents = contents;
+
+    if (!attr->gstate || !attr->contents)
+        return NULL;
+
+    attr->stream = attr->contents->stream;
+    attr->xref = xref;
+
+    return page;
+}
+
+
 HPDF_EXPORT(HPDF_MMgr)
 HPDF_GetPageMMgr  (HPDF_Page page)
 {
