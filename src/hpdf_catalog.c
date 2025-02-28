@@ -512,8 +512,6 @@ HPDF_Catalog_GetAcroForm (HPDF_Catalog catalog)
         ret += HPDF_Dict_Add (form_dict, "Fields", HPDF_Array_New (form_dict->mmgr));
         ret += HPDF_Dict_Add (catalog, "AcroForm", form_dict);
 
-        ret += HPDF_Dict_AddBoolean (form_dict, "NeedAppearances", HPDF_TRUE);
-
         HPDF_Dict dr = HPDF_Dict_New (catalog->mmgr);
         if(!dr)
             return NULL;

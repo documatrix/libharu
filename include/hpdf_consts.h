@@ -564,11 +564,15 @@
 #define HPDF_FIELD_NOEXPORT            4           /*    3    */
 #define HPDF_FIELD_MULTILINE           4096        /*    13   */
 #define HPDF_FIELD_PASSWORD            8192        /*    14   */
+#define HPDF_FIELD_NOTOGGLETOOFF       16384       /*    15   */
+#define HPDF_FIELD_RADIO               32768       /*    16   */
+#define HPDF_FIELD_PUSHBUTTON          65536       /*    17   */
 #define HPDF_FIELD_FILESELECT          1048576     /*    21   */
 #define HPDF_FIELD_DONOTSPELLCHECK     4194304     /*    23   */
 #define HPDF_FIELD_DONOTSCROLL         8388608     /*    24   */
 #define HPDF_FIELD_COMB                16777216    /*    25   */
 #define HPDF_FIELD_RICHTEXT            33554432    /*    26   */
+#define HPDF_FIELD_RADIOSINUNISON      33554432    /*    26   */
 
 
 /*----------------------------------------------------------------------------*/

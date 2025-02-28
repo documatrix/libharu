@@ -606,6 +606,7 @@ typedef HPDF_Dict  HPDF_StructureElement;
 typedef HPDF_Dict  HPDF_StructTreeRoot;
 typedef HPDF_Dict  HPDF_Artifact;
 typedef HPDF_Dict  HPDF_MarkedContent;
+typedef HPDF_Dict  HPDF_RadioButtonField;
 
 #ifdef __cplusplus
 }

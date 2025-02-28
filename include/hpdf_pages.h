@@ -85,6 +85,10 @@ HPDF_Page
 HPDF_Page_New  (HPDF_MMgr   mmgr,
                 HPDF_Xref   xref);
 
+HPDF_Page
+HPDF_Page_New_Fake (HPDF_MMgr   mmgr,
+                    HPDF_Xref   xref,
+                    HPDF_Dict   contents);
 
 void*
 HPDF_Page_GetInheritableItem  (HPDF_Page      page,
