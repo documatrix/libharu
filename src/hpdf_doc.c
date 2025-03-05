@@ -24,6 +24,7 @@
 #include "hpdf_info.h"
 #include "hpdf_page_label.h"
 #include "hpdf_structure_element.h"
+#include "hpdf_field.h"
 #include "hpdf.h"
 #include <string.h>
 
@@ -2977,4 +2978,12 @@ HPDF_CreateForm  (HPDF_Doc              pdf,
                   HPDF_StructureElement parent)
 {
     return HPDF_CreateStructureElement(pdf, HPDF_STRUCTURE_TYPE_FORM, parent);
+}
+
+HPDF_EXPORT(HPDF_RadioButtonField)
+HPDF_CreateRadioButtonField  (HPDF_Doc    pdf,
+                              const char *name,
+                              HPDF_UINT   flag)
+{
+    return HPDF_RadioButtonField_New(pdf, name, flag);
 }

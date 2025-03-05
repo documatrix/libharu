@@ -1719,6 +1719,11 @@ HPDF_EXPORT(HPDF_StructureElement)
 HPDF_CreateForm  (HPDF_Doc              pdf,
                   HPDF_StructureElement parent);
 
+HPDF_EXPORT(HPDF_RadioButtonField)
+HPDF_CreateRadioButtonField  (HPDF_Doc    pdf,
+                              const char *name,
+                              HPDF_UINT   flag);
+
 /*--- Compatibility ------------------------------------------------------*/
 
 /* BX --not implemented yet */
@@ -1813,7 +1818,9 @@ HPDF_Page_TextField  (HPDF_Page            page,
                       HPDF_REAL            right,
                       HPDF_REAL            bottom,
                       const char          *name,
-                      const char          *text,
+                      const char          *value,
+                      HPDF_Encoder         encoder,
+                      const char          *encoded_text,
                       HPDF_UINT            flag,
                       HPDF_BOOL            print,
                       HPDF_UINT            max_len,
@@ -1846,6 +1853,21 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
                           HPDF_INT       rotation,
                           HPDF_Color     color,
                           HPDF_BOOL      checked);
+
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_Page_RadioButtonField  (HPDF_Page              page,
+                             HPDF_Doc               pdf,
+                             HPDF_RadioButtonField  radio_field,
+                             HPDF_REAL              left,
+                             HPDF_REAL              top,
+                             HPDF_REAL              right,
+                             HPDF_REAL              bottom,
+                             const char            *value,
+                             HPDF_Encoder           encoder,
+                             HPDF_BOOL              print,
+                             HPDF_INT               rotation,
+                             HPDF_Color             color,
+                             HPDF_BOOL              selected);
 
 HPDF_EXPORT(HPDF_STATUS)
 HPDF_SetTextPlacementAccuracy (HPDF_Doc  pdf,

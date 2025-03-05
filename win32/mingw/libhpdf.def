@@ -165,6 +165,7 @@ EXPORTS
  HPDF_Page_MoveTo@12                 = HPDF_Page_MoveTo
  HPDF_Page_MoveToNextLine@4          = HPDF_Page_MoveToNextLine
  HPDF_Page_New_Content_Stream@8      = HPDF_Page_New_Content_Stream
+ HPDF_Page_RadioButtonField@84       = HPDF_Page_RadioButtonField
  HPDF_Page_Rectangle@20              = HPDF_Page_Rectangle
  HPDF_Page_SetCharSpace@8            = HPDF_Page_SetCharSpace
  HPDF_Page_SetCMYKFill@20            = HPDF_Page_SetCMYKFill
@@ -198,7 +199,7 @@ EXPORTS
  HPDF_Page_ShowTextNextLineEx@16     = HPDF_Page_ShowTextNextLineEx
  HPDF_Page_SignatureField@8          = HPDF_Page_SignatureField
  HPDF_Page_Stroke@4                  = HPDF_Page_Stroke
- HPDF_Page_TextField@8               = HPDF_Page_TextField
+ HPDF_Page_TextField@104             = HPDF_Page_TextField
  HPDF_Page_TextOut@16                = HPDF_Page_TextOut
  HPDF_Page_TextRect@32               = HPDF_Page_TextRect
  HPDF_Page_TextWidth@8               = HPDF_Page_TextWidth
@@ -284,6 +285,7 @@ EXPORTS
  HPDF_CreateBibEntry@8                      = HPDF_CreateBibEntry
  HPDF_CreateCode@8                          = HPDF_CreateCode
  HPDF_CreateLink@8                          = HPDF_CreateLink
+ HPDF_CreateRadioButtonField@12             = HPDF_CreateRadioButtonField
  HPDF_CreateAnnot@8                         = HPDF_CreateAnnot
  HPDF_CreateRuby@8                          = HPDF_CreateRuby
  HPDF_CreateWarichu@8                       = HPDF_CreateWarichu
