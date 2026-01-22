@@ -3177,6 +3177,7 @@ HPDF_Page_WriteComment  (HPDF_Page    page,
  * font - The text fields font
  * font_size - The font_size
  * color - The text color
+ * border_width - The border width
  */
 HPDF_EXPORT(HPDF_Annotation)
 HPDF_Page_TextField  (HPDF_Page      page,
@@ -3196,7 +3197,8 @@ HPDF_Page_TextField  (HPDF_Page      page,
                       HPDF_INT       rotation,
                       HPDF_Font      font,
                       HPDF_REAL      font_size,
-                      HPDF_Color     color)
+                      HPDF_Color     color,
+                      HPDF_REAL      border_width)
 {
     HPDF_Dict textField;
     HPDF_STATUS ret;
@@ -3254,6 +3256,19 @@ HPDF_Page_TextField  (HPDF_Page      page,
     }
     ret += HPDF_Dict_Add (textField, "V", textFieldValue);
 
+    /* BS */
+    if (border_width > 0) {
+        HPDF_Dict bs = HPDF_Dict_New (page->mmgr);
+        if (!bs) {
+            HPDF_CheckError (page->error);
+            return NULL;
+        }
+        ret += HPDF_Dict_AddName (bs, "Type", "Border");
+        ret += HPDF_Dict_AddReal (bs, "W", border_width);
+        ret += HPDF_Dict_AddName (bs, "S", "S");
+        ret += HPDF_Dict_Add (textField, "BS", bs);
+    }
+
     /* DR */
     HPDF_Dict resource = HPDF_Dict_New (page->mmgr);
     if (!resource) {
@@ -3298,16 +3313,32 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Dict_Add (textField, "DA", daValue);
 
     /* MK */
-    if (rotation && rotation != 0 && (rotation % 90) == 0)
-    {
-        HPDF_Dict mk = HPDF_Dict_New (page->mmgr);
-        if (!mk) {
+    HPDF_Dict mk = HPDF_Dict_New (page->mmgr);
+    if (!mk) {
+        HPDF_CheckError (page->error);
+        return NULL;
+    }
+
+    /* BC */
+    if (border_width > 0) {
+        HPDF_Array bc = HPDF_Array_New (page->mmgr);
+        if (!bc) {
             HPDF_CheckError (page->error);
             return NULL;
         }
-        ret += HPDF_Dict_AddNumber (mk, "R", rotation);
-        ret += HPDF_Dict_Add (textField, "MK", mk);
+        ret += HPDF_Array_AddReal (bc, 0);
+        ret += HPDF_Array_AddReal (bc, 0);
+        ret += HPDF_Array_AddReal (bc, 0);
+        ret += HPDF_Dict_Add (mk, "BC", bc);
     }
+    
+    /* R */
+    if (rotation && rotation != 0 && (rotation % 90) == 0)
+    {
+        ret += HPDF_Dict_AddNumber (mk, "R", rotation);
+    }
+
+    ret += HPDF_Dict_Add (textField, "MK", mk);
 
     /* ALIGNMENT */
     if (alignment > 0 && alignment <= 2)
@@ -3398,6 +3429,18 @@ HPDF_Page_TextField  (HPDF_Page      page,
 
 
     ret += HPDF_Stream_WriteStr (ap_stream->stream, "/Tx BMC\n");
+
+    /* Border Width */
+    if (border_width > 0) {
+        ret += HPDF_Page_GSave(fake_page);
+        ret += HPDF_Page_SetRGBFill(fake_page, 0, 0, 0);
+        ret += HPDF_Page_SetLineWidth(fake_page, border_width);
+        ret += HPDF_Page_Rectangle(fake_page, border_width/2.0, border_width/2.0,
+                                   field_width - border_width, field_height - border_width);
+        ret += HPDF_Page_ClosePathStroke(fake_page);
+        ret += HPDF_Page_GRestore(fake_page);
+    }
+
     ret += HPDF_Page_BeginText(fake_page);
 
     HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
