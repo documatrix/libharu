@@ -3913,7 +3913,7 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
 
     *pbuf++ = ' ';
     pbuf = HPDF_FToA (pbuf, border_width, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 ", eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
     pbuf = HPDF_FToA (pbuf, box_offset, eptr);
     *pbuf++ = ' ';
     pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
@@ -3933,7 +3933,9 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
     pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
     pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
     pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " 0 l S", eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, border_width, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
 
     ret += HPDF_Stream_WriteStr (yes_stream->stream, yes_buf);
 
@@ -3979,7 +3981,7 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
 
     *pbuf++ = ' ';
     pbuf = HPDF_FToA (pbuf, border_width, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 ", eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
     pbuf = HPDF_FToA (pbuf, box_offset, eptr);
     *pbuf++ = ' ';
     pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
@@ -3999,7 +4001,9 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
     pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
     pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
     pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " 0 l S", eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA (pbuf, border_width, eptr);
+    pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
 
     ret += HPDF_Stream_WriteStr (off_stream->stream, off_buf);
 
@@ -4563,7 +4567,7 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
 
         *pbuf++ = ' ';
         pbuf = HPDF_FToA (pbuf, border_width, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 ", eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
         pbuf = HPDF_FToA (pbuf, box_offset, eptr);
         *pbuf++ = ' ';
         pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
@@ -4583,7 +4587,9 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
         pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
         pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
         pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " 0 l S", eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, border_width, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
     } else {
         /* Print Outer Circle */
         pbuf = HPDF_FToA(pbuf, 0, eptr);
@@ -4661,7 +4667,7 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
 
         *pbuf++ = ' ';
         pbuf = HPDF_FToA (pbuf, border_width, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 ", eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
         pbuf = HPDF_FToA (pbuf, box_offset, eptr);
         *pbuf++ = ' ';
         pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
@@ -4681,7 +4687,9 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
         pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
         pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
         pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " 0 l S", eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, border_width, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
     } else {
         /* Print Outer Circle */
         pbuf = HPDF_FToA(pbuf, 0, eptr);
