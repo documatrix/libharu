@@ -4064,23 +4064,90 @@ CheckCheckmark  (char       *pbuf,
     HPDF_REAL sx = ox + (inner_w - s) / 2.0f;
     HPDF_REAL sy = oy + (inner_h - s) / 2.0f;
 
+    // Small inset so stroke caps don't touch the border
     HPDF_REAL inset = 0.5f;
     sx += inset; sy += inset;
     s  -= 2.0f * inset;
     if (s < 0.0f) s = 0.0f;
 
-    HPDF_REAL x1 = sx + s * 0.20f;
-    HPDF_REAL y1 = sy + s * 0.55f;
+    // Mark parameters
+    HPDF_REAL angle_between_deg = 85.0f;
+    HPDF_REAL long_over_short   = 2.5f;
+    HPDF_REAL tilt_deg          = 50.0f;
+    
+    // Safety clamps (avoid degenerate geometry)
+    if (angle_between_deg < 15.0f)  angle_between_deg = 15.0f;
+    if (angle_between_deg > 170.0f) angle_between_deg = 170.0f;
+    if (long_over_short < 1.05f)    long_over_short   = 1.05f;
 
-    HPDF_REAL x2 = sx + s * 0.45f;
-    HPDF_REAL y2 = sy + s * 0.30f;
+    // Keep tilt in a nice range (optional, purely cosmetic)
+    while (tilt_deg < -360.0f) tilt_deg += 360.0f;
+    while (tilt_deg >  360.0f) tilt_deg -= 360.0f;
 
-    HPDF_REAL x3 = sx + s * 0.80f;
-    HPDF_REAL y3 = sy + s * 0.75f;
+    const HPDF_REAL DEG2RAD = (HPDF_REAL)(3.14159265358979323846 / 180.0);
 
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, border_width, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " w ", eptr);
+    // Angle definitions:
+    // a2: direction of long stroke from vertex
+    // a1: direction of short stroke from vertex (rotated by angle_between)
+    HPDF_REAL a2 = tilt_deg * DEG2RAD;
+    HPDF_REAL a1 = (tilt_deg + angle_between_deg) * DEG2RAD;
+
+    // Unit direction vectors FROM vertex:
+    // d2 -> toward long stroke end, d1 -> toward short stroke start
+    HPDF_REAL d2x = (HPDF_REAL)cos(a2), d2y = (HPDF_REAL)sin(a2);
+    HPDF_REAL d1x = (HPDF_REAL)cos(a1), d1y = (HPDF_REAL)sin(a1);
+
+    // Build in local coords with vertex at (0,0), short length = 1, long length = long_over_short
+    HPDF_REAL Ls = 1.0f;
+    HPDF_REAL Ll = long_over_short * Ls;
+
+    // Local points: P1(start) -> V(vertex) -> P3(end)
+    HPDF_REAL lx1 = d1x * Ls,  ly1 = d1y * Ls;   // start point (short stroke endpoint)
+    HPDF_REAL lx2 = 0.0f,      ly2 = 0.0f;       // vertex
+    HPDF_REAL lx3 = d2x * Ll,  ly3 = d2y * Ll;   // end point (long stroke endpoint)
+
+    // Compute local bounding box for auto-fit
+    HPDF_REAL minx = lx1, maxx = lx1;
+    HPDF_REAL miny = ly1, maxy = ly1;
+
+    if (lx2 < minx) minx = lx2; if (lx2 > maxx) maxx = lx2;
+    if (ly2 < miny) miny = ly2; if (ly2 > maxy) maxy = ly2;
+    if (lx3 < minx) minx = lx3; if (lx3 > maxx) maxx = lx3;
+    if (ly3 < miny) miny = ly3; if (ly3 > maxy) maxy = ly3;
+
+    HPDF_REAL bw = maxx - minx;
+    HPDF_REAL bh = maxy - miny;
+    if (bw <= 0.0f) bw = 1.0f;
+    if (bh <= 0.0f) bh = 1.0f;
+
+    // Padding inside the square
+    HPDF_REAL pad = 0.10f * s;
+    HPDF_REAL avail = s - 2.0f * pad;
+    if (avail < 0.0f) avail = 0.0f;
+
+    // Scale so bounding box fits in avail x avail
+    HPDF_REAL scale = (bw > bh) ? (avail / bw) : (avail / bh);
+    if (scale < 0.0f) scale = 0.0f;
+
+    // Center the scaled mark in the square
+    HPDF_REAL cx_local = (minx + maxx) * 0.5f;
+    HPDF_REAL cy_local = (miny + maxy) * 0.5f;
+
+    HPDF_REAL cx_target = sx + s * 0.5f;
+    HPDF_REAL cy_target = sy + s * 0.5f;
+
+    // Transform to final coords
+    HPDF_REAL x1 = cx_target + (lx1 - cx_local) * scale;
+    HPDF_REAL y1 = cy_target + (ly1 - cy_local) * scale;
+
+    HPDF_REAL x2 = cx_target + (lx2 - cx_local) * scale;
+    HPDF_REAL y2 = cy_target + (ly2 - cy_local) * scale;
+
+    HPDF_REAL x3 = cx_target + (lx3 - cx_local) * scale;
+    HPDF_REAL y3 = cy_target + (ly3 - cy_local) * scale;
+
+    // Emit PDF path
+    pbuf = (char *)HPDF_StrCpy (pbuf, " 2 w 1 J 1 j ", eptr);
 
     pbuf = HPDF_FToA(pbuf, x1, eptr);
     *pbuf++ = ' ';
@@ -4107,42 +4174,54 @@ CheckCross  (char       *pbuf,
              HPDF_REAL  field_height,
              HPDF_REAL  border_width)
 {
-    HPDF_REAL cross_width = field_width - border_width;
-    HPDF_REAL cross_height = field_height - border_width;
-    HPDF_REAL cross_x_offset = border_width;
-    HPDF_REAL cross_y_offset = border_width;
-    if ( cross_width < cross_height )
-    {
-        cross_y_offset = ( cross_height - cross_width ) / 2 + border_width;
-        cross_height = cross_width + cross_y_offset - border_width;
-    }
-    else
-    {
-        cross_x_offset = ( cross_width - cross_height ) / 2 + border_width;
-        cross_width = cross_height + cross_x_offset - border_width;
-    }
+    // Inner drawable area
+    HPDF_REAL inner_w = field_width  - 2.0f * border_width;
+    HPDF_REAL inner_h = field_height - 2.0f * border_width;
+    if (inner_w < 0.0f) inner_w = 0.0f;
+    if (inner_h < 0.0f) inner_h = 0.0f;
 
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, border_width, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " w ", eptr);
+    // Origin of inner area
+    HPDF_REAL ox = border_width;
+    HPDF_REAL oy = border_width;
 
-    pbuf = HPDF_FToA (pbuf, cross_x_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, cross_y_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
-    pbuf = HPDF_FToA (pbuf, cross_width, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, cross_height, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l S ", eptr);
+    // Make square
+    HPDF_REAL s = (inner_w < inner_h) ? inner_w : inner_h;
+    HPDF_REAL sx = ox + (inner_w - s) / 2.0f;
+    HPDF_REAL sy = oy + (inner_h - s) / 2.0f;
 
-    pbuf = HPDF_FToA (pbuf, cross_x_offset, eptr);
+    // Inset so stroke caps don't touch the border
+    HPDF_REAL inset = 2.0f;
+    sx += inset;
+    sy += inset;
+    s  -= 2.0f * inset;
+    if (s < 0.0f) s = 0.0f;
+
+    HPDF_REAL x1 = sx;
+    HPDF_REAL y1 = sy;
+    HPDF_REAL x2 = sx + s;
+    HPDF_REAL y2 = sy + s;
+
+    pbuf = (char *)HPDF_StrCpy(pbuf, " 2 w 1 J 1 j ", eptr);
+    pbuf = HPDF_FToA(pbuf, x1, eptr);
     *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, cross_height, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
-    pbuf = HPDF_FToA (pbuf, cross_width, eptr);
+    pbuf = HPDF_FToA(pbuf, y1, eptr);
+    pbuf = (char *)HPDF_StrCpy(pbuf, " m ", eptr);
+
+    pbuf = HPDF_FToA(pbuf, x2, eptr);
     *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, cross_y_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l S ", eptr);
+    pbuf = HPDF_FToA(pbuf, y2, eptr);
+    pbuf = (char *)HPDF_StrCpy(pbuf, " l S ", eptr);
+
+    pbuf = HPDF_FToA(pbuf, x1, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA(pbuf, y2, eptr);
+    pbuf = (char *)HPDF_StrCpy(pbuf, " m ", eptr);
+
+    pbuf = HPDF_FToA(pbuf, x2, eptr);
+    *pbuf++ = ' ';
+    pbuf = HPDF_FToA(pbuf, y1, eptr);
+    pbuf = (char *)HPDF_StrCpy(pbuf, " l S ", eptr);
+
     return pbuf;
 }
 
@@ -4154,21 +4233,26 @@ CheckCircle  (char       *pbuf,
               HPDF_REAL  border_width,
               HPDF_Color color)
 {
+    // Inner drawable area
     HPDF_REAL circle_dia = (field_width < field_height ? field_width : field_height);
     HPDF_REAL usable_dia = circle_dia - 2.0f * border_width;
     if (usable_dia < 0.0f) usable_dia = 0.0f;
     HPDF_REAL circle_x_offset = field_width  / 2.0f;
     HPDF_REAL circle_y_offset = field_height / 2.0f;
-
     HPDF_REAL circle_ray = usable_dia / 2.0f;
+
+    // Inset so stroke caps don't touch the border
     HPDF_REAL inset = 0.5f;
 
+    // Dot radius
     HPDF_REAL dot_ray = (usable_dia / 4.0f) - inset;
     if (dot_ray < 0.0f) dot_ray = 0.0f;
 
+    // Fill color
     pbuf = InternalWriteColorToBuf(pbuf, eptr, color, HPDF_TRUE);
     *pbuf++ = '\012';
 
+    // Draw circle path
     pbuf = HPDF_FToA(pbuf, circle_x_offset - dot_ray, eptr);
     *pbuf++ = ' ';
     pbuf = HPDF_FToA(pbuf, circle_y_offset, eptr);
@@ -4179,6 +4263,7 @@ CheckCircle  (char       *pbuf,
     pbuf = QuarterCircleC(pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
     pbuf = QuarterCircleD(pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
     pbuf = (char *)HPDF_StrCpy(pbuf, "f\012", eptr);
+    
     return pbuf;
 }
 
