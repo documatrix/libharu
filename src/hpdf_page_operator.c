@@ -3845,7 +3845,15 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
     }
 
     // /CA
-    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, "8", NULL);
+    const char *ca_value;
+    if (styling == 1) {
+        ca_value = "4";
+    } else if (styling == 2) {
+        ca_value = "l";
+    } else {
+        ca_value = "8";
+    }
+    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, ca_value, NULL);
     if (!textFieldValue) {
         HPDF_CheckError (page->error);
         return NULL;
@@ -3908,34 +3916,34 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
     }
 
     // Print Box []
-    pbuf = HPDF_FToA (pbuf, 0, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " G", eptr);
+    if (border_width > 0) {
+        pbuf = HPDF_FToA (pbuf, 0, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " G ", eptr);
+        pbuf = HPDF_FToA (pbuf, border_width, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
+        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
 
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, border_width, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
-    pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
+        pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
 
-    pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+        pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
 
-    pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
-
-    pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
-    pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, border_width, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
+        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, border_width, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
+    }
 
     ret += HPDF_Stream_WriteStr (yes_stream->stream, yes_buf);
 
@@ -3976,35 +3984,35 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
     HPDF_MemSet (off_buf, 0, HPDF_TMP_BUF_SIZ);
 
     // Print Box []
-    pbuf = HPDF_FToA (pbuf, 0, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " G", eptr);
+    if (border_width > 0) {
+        pbuf = HPDF_FToA (pbuf, 0, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " G ", eptr);
+        pbuf = HPDF_FToA (pbuf, border_width, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
+        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
 
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, border_width, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
-    pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
+        pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
 
-    pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+        pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
 
-    pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
-
-    pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
-    pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-    *pbuf++ = ' ';
-    pbuf = HPDF_FToA (pbuf, border_width, eptr);
-    pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
-
+        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+        *pbuf++ = ' ';
+        pbuf = HPDF_FToA (pbuf, border_width, eptr);
+        pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
+    }
+    
     ret += HPDF_Stream_WriteStr (off_stream->stream, off_buf);
 
     HPDF_Array off_bbox = HPDF_Array_New (page->mmgr);
@@ -4194,7 +4202,7 @@ CheckCross  (char       *pbuf,
     HPDF_REAL sy = oy + (inner_h - s) / 2.0f;
 
     // Inset so stroke caps don't touch the border
-    HPDF_REAL inset = 2.0f;
+    HPDF_REAL inset = 1.0f;
     sx += inset;
     sy += inset;
     s  -= 2.0f * inset;
@@ -4205,7 +4213,7 @@ CheckCross  (char       *pbuf,
     HPDF_REAL x2 = sx + s;
     HPDF_REAL y2 = sy + s;
 
-    pbuf = (char *)HPDF_StrCpy(pbuf, " 2 w 1 J 1 j ", eptr);
+    pbuf = (char *)HPDF_StrCpy(pbuf, " 1 w 0 J 0 j ", eptr);
     pbuf = HPDF_FToA(pbuf, x1, eptr);
     *pbuf++ = ' ';
     pbuf = HPDF_FToA(pbuf, y1, eptr);
@@ -4517,6 +4525,22 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
 
     ret += HPDF_Dict_Add (annot, "MK", mk);
 
+    // /CA
+    const char *ca_value;
+    if (styling == 0) {
+        ca_value = "8";
+    } else if (styling == 1) {
+        ca_value = "4";
+    } else {
+        ca_value = "l";
+    }
+    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, ca_value, NULL);
+    if (!textFieldValue) {
+        HPDF_CheckError (page->error);
+        return NULL;
+    }
+    ret += HPDF_Dict_Add (mk, "CA", textFieldValue);
+
     // AP - APPEARANCE DICTIONARY
     HPDF_Dict ap = HPDF_Dict_New (page->mmgr);
     if (!ap) {
@@ -4560,53 +4584,53 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
     if (circle_ray < 0.0f) circle_ray = 0.0f;
     
     /* outer part */
-    if (styling == 0 || styling == 1) {
-        // Print Box []
-        pbuf = HPDF_FToA (pbuf, 0, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " G", eptr);
+    if (border_width > 0) {
+        if (styling == 0 || styling == 1) {
+            // Print Box []
+            pbuf = HPDF_FToA (pbuf, 0, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " G ", eptr);
+            pbuf = HPDF_FToA (pbuf, border_width, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
+            pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
 
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, border_width, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
-        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
+            pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
 
-        pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+            pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
 
-        pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+            pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+            pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA (pbuf, border_width, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
+        } else {
+            /* Print Outer Circle */
+            pbuf = HPDF_FToA(pbuf, 0, eptr);
+            pbuf = (char *)HPDF_StrCpy(pbuf, " G\012", eptr);
+            pbuf = HPDF_FToA(pbuf, border_width, eptr);
+            pbuf = (char *)HPDF_StrCpy(pbuf, " w\012", eptr);
 
-        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
-        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, border_width, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
-    } else {
-        /* Print Outer Circle */
-        pbuf = HPDF_FToA(pbuf, 0, eptr);
-        pbuf = (char *)HPDF_StrCpy(pbuf, " G\012", eptr);
-        pbuf = HPDF_FToA(pbuf, border_width, eptr);
-        pbuf = (char *)HPDF_StrCpy(pbuf, " w\012", eptr);
+            pbuf = HPDF_FToA(pbuf, circle_x_offset - circle_ray, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA(pbuf, circle_y_offset, eptr);
+            pbuf = (char *)HPDF_StrCpy(pbuf, " m\012", eptr);
 
-        pbuf = HPDF_FToA(pbuf, circle_x_offset - circle_ray, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA(pbuf, circle_y_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy(pbuf, " m\012", eptr);
-
-        pbuf = QuarterCircleA(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
-        pbuf = QuarterCircleB(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
-        pbuf = QuarterCircleC(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
-        pbuf = QuarterCircleD(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
-        pbuf = (char *)HPDF_StrCpy(pbuf, "s\012", eptr);
+            pbuf = QuarterCircleA(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
+            pbuf = QuarterCircleB(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
+            pbuf = QuarterCircleC(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
+            pbuf = QuarterCircleD(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
+            pbuf = (char *)HPDF_StrCpy(pbuf, "s\012", eptr);
+        }
     }
 
     /* inner part */
@@ -4660,53 +4684,53 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
     HPDF_MemSet (off_buf, 0, HPDF_TMP_BUF_SIZ);
 
     /* outer part */
-    if (styling == 0 || styling == 1) {
-        // Print Box []
-        pbuf = HPDF_FToA (pbuf, 0, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " G", eptr);
+    if (border_width > 0) {
+        if (styling == 0 || styling == 1) {
+            // Print Box []
+            pbuf = HPDF_FToA (pbuf, 0, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " G ", eptr);
+            pbuf = HPDF_FToA (pbuf, border_width, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
+            pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
 
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, border_width, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " w 0 J 0 j 0 ", eptr);
-        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = (char *)HPDF_StrCpy (pbuf, " m ", eptr);
+            pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
 
-        pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+            pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
 
-        pbuf = HPDF_FToA (pbuf, field_width - box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+            pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
+            pbuf = HPDF_FToA (pbuf, box_offset, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA (pbuf, border_width, eptr);
+            pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
+        } else {
+            /* Print Outer Circle */
+            pbuf = HPDF_FToA(pbuf, 0, eptr);
+            pbuf = (char *)HPDF_StrCpy(pbuf, " G\012", eptr);
+            pbuf = HPDF_FToA(pbuf, border_width, eptr);
+            pbuf = (char *)HPDF_StrCpy(pbuf, " w\012", eptr);
 
-        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, field_height - box_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " l ", eptr);
-        pbuf = HPDF_FToA (pbuf, box_offset, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA (pbuf, border_width, eptr);
-        pbuf = (char *)HPDF_StrCpy (pbuf, " l S", eptr);
-    } else {
-        /* Print Outer Circle */
-        pbuf = HPDF_FToA(pbuf, 0, eptr);
-        pbuf = (char *)HPDF_StrCpy(pbuf, " G\012", eptr);
-        pbuf = HPDF_FToA(pbuf, border_width, eptr);
-        pbuf = (char *)HPDF_StrCpy(pbuf, " w\012", eptr);
+            pbuf = HPDF_FToA(pbuf, circle_x_offset - circle_ray, eptr);
+            *pbuf++ = ' ';
+            pbuf = HPDF_FToA(pbuf, circle_y_offset, eptr);
+            pbuf = (char *)HPDF_StrCpy(pbuf, " m\012", eptr);
 
-        pbuf = HPDF_FToA(pbuf, circle_x_offset - circle_ray, eptr);
-        *pbuf++ = ' ';
-        pbuf = HPDF_FToA(pbuf, circle_y_offset, eptr);
-        pbuf = (char *)HPDF_StrCpy(pbuf, " m\012", eptr);
-
-        pbuf = QuarterCircleA(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
-        pbuf = QuarterCircleB(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
-        pbuf = QuarterCircleC(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
-        pbuf = QuarterCircleD(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
-        pbuf = (char *)HPDF_StrCpy(pbuf, "s\012", eptr);
+            pbuf = QuarterCircleA(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
+            pbuf = QuarterCircleB(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
+            pbuf = QuarterCircleC(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
+            pbuf = QuarterCircleD(pbuf, eptr, circle_x_offset, circle_y_offset, circle_ray);
+            pbuf = (char *)HPDF_StrCpy(pbuf, "s\012", eptr);
+        }
     }
 
     ret += HPDF_Stream_WriteStr (off_stream->stream, off_buf);
