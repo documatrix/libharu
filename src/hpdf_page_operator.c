@@ -3457,6 +3457,16 @@ HPDF_Page_TextField  (HPDF_Page      page,
         ret += HPDF_Page_Rectangle(fake_page, border_width/2.0, border_width/2.0,
                                    field_width - border_width, field_height - border_width);
         ret += HPDF_Page_ClosePathStroke(fake_page);
+        
+        if (flag & HPDF_FIELD_COMB && max_len > 0) {
+            HPDF_REAL char_width = field_width / (HPDF_REAL)max_len;
+            for (HPDF_UINT i = 1; i < max_len; i++) {
+                ret += HPDF_Page_MoveTo(fake_page, char_width * (HPDF_REAL)i, border_width);
+                ret += HPDF_Page_LineTo(fake_page, char_width * (HPDF_REAL)i, field_height - border_width);
+            }
+            ret += HPDF_Page_ClosePathStroke(fake_page);
+        }
+
         ret += HPDF_Page_GRestore(fake_page);
     }
 
