@@ -4391,7 +4391,6 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
                              HPDF_INT               rotation,
                              HPDF_Color             color,
                              HPDF_BOOL              selected,
-                             HPDF_UINT              flag,
                              HPDF_UINT              styling,
                              HPDF_REAL              border_width)
 {
@@ -4435,10 +4434,6 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
     } else {
         ret += HPDF_Dict_AddNumber (annot, "F", 0);
     }
-
-    /* FF */
-    if (flag > 0)
-        ret += HPDF_Dict_AddNumber (annot, "Ff", flag);
 
     /* BS */
     if (border_width > 0) {

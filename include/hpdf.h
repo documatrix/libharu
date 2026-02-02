@@ -1881,7 +1881,6 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
                              HPDF_INT               rotation,
                              HPDF_Color             color,
                              HPDF_BOOL              selected,
-                             HPDF_UINT              flag,
                              HPDF_UINT              styling,
                              HPDF_REAL              border_width);
 
