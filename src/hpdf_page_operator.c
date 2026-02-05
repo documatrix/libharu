@@ -3454,20 +3454,21 @@ HPDF_Page_TextField  (HPDF_Page      page,
         ret += HPDF_Page_GSave(fake_page);
         ret += HPDF_Page_SetRGBFill(fake_page, 0, 0, 0);
         ret += HPDF_Page_SetLineWidth(fake_page, border_width);
-        ret += HPDF_Page_Rectangle(fake_page, border_width/2.0, border_width/2.0,
+        ret += HPDF_Page_Rectangle(fake_page, border_width / 2.0, border_width / 2.0,
                                    field_width - border_width, field_height - border_width);
         ret += HPDF_Page_ClosePathStroke(fake_page);
         
-        if (flag & HPDF_FIELD_COMB && max_len > 0) {
-            HPDF_REAL char_width = field_width / (HPDF_REAL)max_len;
-            for (HPDF_UINT i = 1; i < max_len; i++) {
-                ret += HPDF_Page_MoveTo(fake_page, char_width * (HPDF_REAL)i, border_width);
-                ret += HPDF_Page_LineTo(fake_page, char_width * (HPDF_REAL)i, field_height - border_width);
+        if ( flag & HPDF_FIELD_COMB && max_len > 0 ) {
+            HPDF_REAL usable_width = field_width - 2.0 * border_width;
+            HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
+            for ( HPDF_UINT i = 1; i < max_len; i++ ) {
+                ret += HPDF_Page_MoveTo( fake_page, cell_width * (HPDF_REAL)i + border_width, border_width / 2.0 );
+                ret += HPDF_Page_LineTo( fake_page, cell_width * (HPDF_REAL)i + border_width, field_height - border_width / 2.0 );
             }
-            ret += HPDF_Page_ClosePathStroke(fake_page);
+            ret += HPDF_Page_ClosePathStroke( fake_page );
         }
 
-        ret += HPDF_Page_GRestore(fake_page);
+        ret += HPDF_Page_GRestore( fake_page );
     }
 
     ret += HPDF_Page_BeginText(fake_page);
@@ -3503,6 +3504,42 @@ HPDF_Page_TextField  (HPDF_Page      page,
             y_offset = field_height - (HPDF_REAL)HPDF_Font_GetDescent(font) / -1000.0 * font_size - padding;
         }
         ret += InternalTextRect(fake_page, padding, y_offset, field_width - padding, 0, encoded_text, talign, NULL, HPDF_TRUE);
+    }
+    else if (flag & HPDF_FIELD_COMB && max_len > 0) {
+        HPDF_REAL ascent  = (HPDF_REAL)HPDF_Font_GetAscent( font )  / 1000.0 * font_size;
+        HPDF_REAL descent = (HPDF_REAL)HPDF_Font_GetDescent( font ) / 1000.0 * font_size;
+        HPDF_REAL text_h  = ascent - descent;
+
+        HPDF_REAL usable_height = field_height - 2.0 * border_width;
+
+        HPDF_REAL y_offset = border_width + ( usable_height - text_h ) / 2.0 - descent;
+
+        HPDF_REAL usable_width = field_width - 2.0 * border_width;
+        HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
+
+        HPDF_UINT text_len = (HPDF_UINT)HPDF_StrLen( encoded_text, HPDF_ENCODING_EOF );
+
+        HPDF_INT start_cell = 0;
+        if (alignment == 1) {
+            start_cell = (HPDF_INT)(( max_len - text_len ) / 2);
+        } else if (alignment == 2) {
+            start_cell = (HPDF_INT)( max_len - text_len );
+        }
+
+        char ch[ 2 ];
+        ch[ 1 ] = '\0';
+
+        for ( HPDF_UINT i = 0; i < text_len; i++ ) {
+            HPDF_INT cell_index = start_cell + (HPDF_INT)i;
+            HPDF_REAL start_x = cell_width * (HPDF_REAL)cell_index + border_width;
+            ch[ 0 ] = encoded_text[ i ];
+            HPDF_REAL text_width = HPDF_Page_TextWidth( fake_page, ch );
+            
+            HPDF_REAL x_offset = start_x + ( cell_width - text_width ) / 2.0;
+
+            ret += HPDF_Page_SetTextMatrix( fake_page, 1, 0, 0, 1, x_offset, y_offset );
+            ret += HPDF_Page_ShowText( fake_page, ch );
+        }
     } else {
         HPDF_REAL x_offset = padding;
         if (alignment != 0) {
