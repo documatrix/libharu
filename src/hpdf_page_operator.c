@@ -3339,6 +3339,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
         HPDF_CheckError (page->error);
         return NULL;
     }
+    HPDF_BOOL mk_used = HPDF_FALSE;
 
     /* BC */
     if (border_width > 0) {
@@ -3349,15 +3350,19 @@ HPDF_Page_TextField  (HPDF_Page      page,
         }
         ret += HPDF_Array_AddNumber (bcArray, 0);
         ret += HPDF_Dict_Add (mk, "BC", bcArray);
+        mk_used = HPDF_TRUE;
     }
     
     /* R */
     if (rotation && rotation != 0 && (rotation % 90) == 0)
     {
         ret += HPDF_Dict_AddNumber (mk, "R", rotation);
+        mk_used = HPDF_TRUE;
     }
 
-    ret += HPDF_Dict_Add (textField, "MK", mk);
+    if (mk_used) {
+        ret += HPDF_Dict_Add (textField, "MK", mk);
+    }
 
     /* ALIGNMENT */
     if (alignment > 0 && alignment <= 2)
@@ -3732,22 +3737,25 @@ HPDF_Page_SignatureField (HPDF_Page      page,
  * rotation - The rotation
  * color - The checkbox color
  * checked - States if the checkbox should be checked
+ * flag - A flag specifying characteristics of the field ( read only, required, etc. )
+ * styling - The style of the checkbox ( cross, checkmark, circle )
+ * border_width - The border width
  */
 HPDF_EXPORT(HPDF_Annotation)
-HPDF_Page_CheckboxField  (HPDF_Page      page,
-                          HPDF_Doc       pdf,
-                          HPDF_REAL      left,
-                          HPDF_REAL      top,
-                          HPDF_REAL      right,
-                          HPDF_REAL      bottom,
-                          const char     *name,
-                          HPDF_BOOL      print,
-                          HPDF_INT       rotation,
-                          HPDF_Color     color,
-                          HPDF_BOOL      checked,
-                          HPDF_UINT      flag,
-                          HPDF_UINT      styling,
-                          HPDF_REAL      border_width)
+HPDF_Page_CheckboxField  (HPDF_Page         page,
+                          HPDF_Doc          pdf,
+                          HPDF_REAL         left,
+                          HPDF_REAL         top,
+                          HPDF_REAL         right,
+                          HPDF_REAL         bottom,
+                          const char        *name,
+                          HPDF_BOOL         print,
+                          HPDF_INT          rotation,
+                          HPDF_Color        color,
+                          HPDF_BOOL         checked,
+                          HPDF_UINT         flag,
+                          HPDF_FieldStyle   styling,
+                          HPDF_REAL         border_width)
 {
     HPDF_Dict checkboxField;
     HPDF_STATUS ret;
@@ -3894,9 +3902,9 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
 
     // /CA
     const char *ca_value;
-    if (styling == 1) {
+    if (styling == HPDF_FIELD_STYLE_CHECKMARK) {
         ca_value = "4";
-    } else if (styling == 2) {
+    } else if (styling == HPDF_FIELD_STYLE_CIRCLE) {
         ca_value = "l";
     } else {
         ca_value = "8";
@@ -3952,10 +3960,10 @@ HPDF_Page_CheckboxField  (HPDF_Page      page,
     }
     HPDF_REAL box_offset = border_width / 2.0;
 
-    if (styling == 1) {
+    if (styling == HPDF_FIELD_STYLE_CHECKMARK) {
         // Checkmark
         pbuf = CheckCheckmark(pbuf, eptr, field_width, field_height, border_width);
-    } else if (styling == 2) {
+    } else if (styling == HPDF_FIELD_STYLE_CIRCLE) {
         // Circle
         pbuf = CheckCircle(pbuf, eptr, field_width, field_height, border_width, color);
     } else {
@@ -4414,6 +4422,8 @@ InternalAnnotationMatrix  (HPDF_MMgr mmgr,
  * rotation - The rotation
  * color - The radio button color
  * selected - States if the radio button should be selected
+ * styling - The style of the radio button (checkmark, circle, cross)
+ * border_width - The border width of the radio button
  */
 HPDF_EXPORT(HPDF_Annotation)
 HPDF_Page_RadioButtonField  (HPDF_Page              page,
@@ -4429,7 +4439,7 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
                              HPDF_INT               rotation,
                              HPDF_Color             color,
                              HPDF_BOOL              selected,
-                             HPDF_UINT              styling,
+                             HPDF_FieldStyle        styling,
                              HPDF_REAL              border_width)
 {
     HPDF_Dict annot;
@@ -4566,13 +4576,11 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
         ret += HPDF_Dict_AddNumber (mk, "R", rotation);
     }
 
-    ret += HPDF_Dict_Add (annot, "MK", mk);
-
     // /CA
     const char *ca_value;
-    if (styling == 0) {
+    if (styling == HPDF_FIELD_STYLE_CROSS) {
         ca_value = "8";
-    } else if (styling == 1) {
+    } else if (styling == HPDF_FIELD_STYLE_CHECKMARK) {
         ca_value = "4";
     } else {
         ca_value = "l";
@@ -4583,6 +4591,8 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
         return NULL;
     }
     ret += HPDF_Dict_Add (mk, "CA", textFieldValue);
+
+    ret += HPDF_Dict_Add (annot, "MK", mk);
 
     // AP - APPEARANCE DICTIONARY
     HPDF_Dict ap = HPDF_Dict_New (page->mmgr);
@@ -4628,7 +4638,7 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
     
     /* outer part */
     if (border_width > 0) {
-        if (styling == 0 || styling == 1) {
+        if (styling == HPDF_FIELD_STYLE_CROSS || styling == HPDF_FIELD_STYLE_CHECKMARK) {
             // Print Box []
             pbuf = HPDF_FToA (pbuf, 0, eptr);
             pbuf = (char *)HPDF_StrCpy (pbuf, " G ", eptr);
@@ -4677,10 +4687,10 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
     }
 
     /* inner part */
-    if (styling == 0) {
+    if (styling == HPDF_FIELD_STYLE_CROSS) {
         // Cross
         pbuf = CheckCross (pbuf, eptr, field_width, field_height, border_width);
-    } else if (styling == 1) {
+    } else if (styling == HPDF_FIELD_STYLE_CHECKMARK) {
         // Checkmark
         pbuf = CheckCheckmark (pbuf, eptr, field_width, field_height, border_width);
     } else {
@@ -4728,7 +4738,7 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
 
     /* outer part */
     if (border_width > 0) {
-        if (styling == 0 || styling == 1) {
+        if (styling == HPDF_FIELD_STYLE_CROSS || styling == HPDF_FIELD_STYLE_CHECKMARK) {
             // Print Box []
             pbuf = HPDF_FToA (pbuf, 0, eptr);
             pbuf = (char *)HPDF_StrCpy (pbuf, " G ", eptr);
