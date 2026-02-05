@@ -3334,33 +3334,29 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Dict_Add (textField, "DA", daValue);
 
     /* MK */
-    HPDF_Dict mk = HPDF_Dict_New (page->mmgr);
-    if (!mk) {
-        HPDF_CheckError (page->error);
-        return NULL;
-    }
-    HPDF_BOOL mk_used = HPDF_FALSE;
-
-    /* BC */
-    if (border_width > 0) {
-        HPDF_Array bcArray = HPDF_Array_New (page->mmgr);
-        if (!bcArray) {
+    if (border_width > 0 || rotation && rotation != 0 && (rotation % 90) == 0) {
+        HPDF_Dict mk = HPDF_Dict_New (page->mmgr);
+        if (!mk) {
             HPDF_CheckError (page->error);
             return NULL;
         }
-        ret += HPDF_Array_AddNumber (bcArray, 0);
-        ret += HPDF_Dict_Add (mk, "BC", bcArray);
-        mk_used = HPDF_TRUE;
-    }
-    
-    /* R */
-    if (rotation && rotation != 0 && (rotation % 90) == 0)
-    {
-        ret += HPDF_Dict_AddNumber (mk, "R", rotation);
-        mk_used = HPDF_TRUE;
-    }
 
-    if (mk_used) {
+         /* BC */
+        if (border_width > 0) {
+            HPDF_Array bcArray = HPDF_Array_New (page->mmgr);
+            if (!bcArray) {
+                HPDF_CheckError (page->error);
+                return NULL;
+            }
+            ret += HPDF_Array_AddNumber (bcArray, 0);
+            ret += HPDF_Dict_Add (mk, "BC", bcArray);
+        }
+        
+        /* R */
+        if (rotation && rotation != 0 && (rotation % 90) == 0) {
+            ret += HPDF_Dict_AddNumber (mk, "R", rotation);
+        }
+
         ret += HPDF_Dict_Add (textField, "MK", mk);
     }
 
@@ -3457,7 +3453,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
     /* Border Width */
     if (border_width > 0) {
         ret += HPDF_Page_GSave(fake_page);
-        ret += HPDF_Page_SetRGBFill(fake_page, 0, 0, 0);
+        ret += HPDF_Page_SetGrayStroke(fake_page, 0);
         ret += HPDF_Page_SetLineWidth(fake_page, border_width);
         ret += HPDF_Page_Rectangle(fake_page, border_width / 2.0, border_width / 2.0,
                                    field_width - border_width, field_height - border_width);
@@ -3486,7 +3482,13 @@ HPDF_Page_TextField  (HPDF_Page      page,
 
     ret += HPDF_Page_SetFontAndSize(fake_page, font, font_size);
 
-    HPDF_REAL padding = 2.0;
+    HPDF_REAL padding;
+    if ( border_width > 0 ) {
+        padding = border_width * 2.0;
+    } else {
+        padding = 2.0;
+    }
+
     if (flag & HPDF_FIELD_MULTILINE) {
         HPDF_TextAlignment talign = HPDF_TALIGN_LEFT;
         switch (alignment) {
@@ -3916,8 +3918,7 @@ HPDF_Page_CheckboxField  (HPDF_Page         page,
     }
     ret += HPDF_Dict_Add (mk, "CA", textFieldValue);
 
-    if (rotation && rotation != 0 && (rotation % 90) == 0)
-    {
+    if (rotation && rotation != 0 && (rotation % 90) == 0) {
         ret += HPDF_Dict_AddNumber (mk, "R", rotation);
     }
     ret += HPDF_Dict_Add (checkboxField, "MK", mk);
