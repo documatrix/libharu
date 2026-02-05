@@ -3458,13 +3458,14 @@ HPDF_Page_TextField  (HPDF_Page      page,
                                    field_width - border_width, field_height - border_width);
         ret += HPDF_Page_ClosePathStroke(fake_page);
         
-        if ( flag & HPDF_FIELD_COMB && max_len > 0 ) {
+        if ( flag & HPDF_FIELD_COMB && max_len > 1 ) {
             HPDF_REAL usable_width = field_width - 2.0 * border_width;
             HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
             for ( HPDF_UINT i = 1; i < max_len; i++ ) {
                 ret += HPDF_Page_MoveTo( fake_page, cell_width * (HPDF_REAL)i + border_width, border_width / 2.0 );
                 ret += HPDF_Page_LineTo( fake_page, cell_width * (HPDF_REAL)i + border_width, field_height - border_width / 2.0 );
             }
+
             ret += HPDF_Page_ClosePathStroke( fake_page );
         }
 
@@ -3517,7 +3518,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
         HPDF_REAL usable_width = field_width - 2.0 * border_width;
         HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
 
-        HPDF_UINT text_len = (HPDF_UINT)HPDF_StrLen( encoded_text, HPDF_ENCODING_EOF );
+        HPDF_UINT text_len = (HPDF_UINT)HPDF_StrLen( encoded_text, max_len );
 
         HPDF_INT start_cell = 0;
         if (alignment == 1) {
@@ -3525,7 +3526,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
         } else if (alignment == 2) {
             start_cell = (HPDF_INT)( max_len - text_len );
         }
-
+        
         char ch[ 2 ];
         ch[ 1 ] = '\0';
 
