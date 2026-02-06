@@ -3270,12 +3270,23 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Dict_Add (textField, "T", textFieldName);
 
     /* V */
-    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, value, encoder);
+    char *tmp = (char *)HPDF_GetMem( page->mmgr, max_len + 1 );
+    if ( !tmp ) {
+        HPDF_CheckError( page->error );
+        return NULL;
+    }
+    HPDF_StrCpy (tmp, value, tmp + max_len);
+    tmp[max_len] = '\0';
+
+    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, tmp, encoder);
     if (!textFieldValue) {
         HPDF_CheckError (page->error);
         return NULL;
     }
+
+    HPDF_FreeMem (page->mmgr, tmp);
     ret += HPDF_Dict_Add (textField, "V", textFieldValue);
+
 
     /* BS */
     if (border_width > 0) {
@@ -3334,7 +3345,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Dict_Add (textField, "DA", daValue);
 
     /* MK */
-    if (border_width > 0 || rotation && rotation != 0 && (rotation % 90) == 0) {
+    if (border_width > 0 || (rotation && rotation != 0 && (rotation % 90) == 0)) {
         HPDF_Dict mk = HPDF_Dict_New (page->mmgr);
         if (!mk) {
             HPDF_CheckError (page->error);
@@ -3447,32 +3458,31 @@ HPDF_Page_TextField  (HPDF_Page      page,
     attr->fonts = font2;
     attr->text_placement_accuracy = pdf->text_placement_accuracy;
 
-
-    ret += HPDF_Stream_WriteStr (ap_stream->stream, "/Tx BMC\n");
-
     /* Border Width */
     if (border_width > 0) {
         ret += HPDF_Page_GSave(fake_page);
         ret += HPDF_Page_SetGrayStroke(fake_page, 0);
         ret += HPDF_Page_SetLineWidth(fake_page, border_width);
         ret += HPDF_Page_Rectangle(fake_page, border_width / 2.0, border_width / 2.0,
-                                   field_width - border_width, field_height - border_width);
-        ret += HPDF_Page_ClosePathStroke(fake_page);
-        
-        if ( flag & HPDF_FIELD_COMB && max_len > 1 ) {
-            HPDF_REAL usable_width = field_width - 2.0 * border_width;
-            HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
-            for ( HPDF_UINT i = 1; i < max_len; i++ ) {
-                ret += HPDF_Page_MoveTo( fake_page, cell_width * (HPDF_REAL)i + border_width, border_width / 2.0 );
-                ret += HPDF_Page_LineTo( fake_page, cell_width * (HPDF_REAL)i + border_width, field_height - border_width / 2.0 );
+            field_width - border_width, field_height - border_width);
+            ret += HPDF_Page_ClosePathStroke(fake_page);
+            
+            if ( flag & HPDF_FIELD_COMB && max_len > 1 ) {
+                HPDF_REAL usable_width = field_width - 2.0 * border_width;
+                HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
+                for ( HPDF_UINT i = 1; i < max_len; i++ ) {
+                    ret += HPDF_Page_MoveTo( fake_page, cell_width * (HPDF_REAL)i + border_width, border_width / 2.0 );
+                    ret += HPDF_Page_LineTo( fake_page, cell_width * (HPDF_REAL)i + border_width, field_height - border_width / 2.0 );
+                }
+                
+                ret += HPDF_Page_ClosePathStroke( fake_page );
             }
-
-            ret += HPDF_Page_ClosePathStroke( fake_page );
+            
+            ret += HPDF_Page_GRestore( fake_page );
         }
-
-        ret += HPDF_Page_GRestore( fake_page );
-    }
-
+        
+    ret += HPDF_Stream_WriteStr (ap_stream->stream, "/Tx BMC\n");
+    
     ret += HPDF_Page_BeginText(fake_page);
 
     HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
@@ -3512,8 +3522,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
             y_offset = field_height - (HPDF_REAL)HPDF_Font_GetDescent(font) / -1000.0 * font_size - padding;
         }
         ret += InternalTextRect(fake_page, padding, y_offset, field_width - padding, 0, encoded_text, talign, NULL, HPDF_TRUE);
-    }
-    else if (flag & HPDF_FIELD_COMB && max_len > 0) {
+    } else if (flag & HPDF_FIELD_COMB && max_len > 0) {
         HPDF_REAL ascent  = (HPDF_REAL)HPDF_Font_GetAscent( font )  / 1000.0 * font_size;
         HPDF_REAL descent = (HPDF_REAL)HPDF_Font_GetDescent( font ) / 1000.0 * font_size;
         HPDF_REAL text_h  = ascent - descent;
@@ -3821,11 +3830,7 @@ HPDF_Page_CheckboxField  (HPDF_Page         page,
         HPDF_CheckError (page->error);
         return NULL;
     }
-    HPDF_Dict f = HPDF_Dict_New (page->mmgr);
-    if (!f) {
-        HPDF_CheckError (page->error);
-        return NULL;
-    }
+
     ret += HPDF_Dict_Add (checkboxField, "DR", resource);
 
     HPDF_Font font = HPDF_GetFont (pdf, "ZapfDingbats", NULL);
@@ -3859,8 +3864,9 @@ HPDF_Page_CheckboxField  (HPDF_Page         page,
     ret += HPDF_Dict_Add (checkboxField, "DA", daValue);
 
     /* FF */
-    if (flag > 0)
+    if (flag > 0) {
         ret += HPDF_Dict_AddNumber (checkboxField, "Ff", flag);
+    }
     
     /* BS */
     if (border_width > 0) {
