@@ -3888,15 +3888,6 @@ HPDF_Page_CheckboxField  (HPDF_Page         page,
         return NULL;
     }
 
-    // /BG
-    HPDF_Array bgArray = HPDF_Array_New (page->mmgr);
-    if (!bgArray) {
-        HPDF_CheckError (page->error);
-        return NULL;
-    }
-    ret += HPDF_Array_AddNumber (bgArray, 1);
-    ret += HPDF_Dict_Add (mk, "BG", bgArray);
-
     // /BC
     if (border_width > 0) {
         HPDF_Array bcArray = HPDF_Array_New (page->mmgr);
@@ -4558,15 +4549,6 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
         HPDF_CheckError (page->error);
         return NULL;
     }
-
-    // /BG
-    HPDF_Array bgArray = HPDF_Array_New (page->mmgr);
-    if (!bgArray) {
-        HPDF_CheckError (page->error);
-        return NULL;
-    }
-    ret += HPDF_Array_AddNumber (bgArray, 1);
-    ret += HPDF_Dict_Add (mk, "BG", bgArray);
 
     // /BC
     if (border_width > 0) {
