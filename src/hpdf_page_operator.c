@@ -39,7 +39,8 @@ InternalTextRect  (HPDF_Page            page,
                    const char          *text,
                    HPDF_TextAlignment   align,
                    HPDF_UINT           *len,
-                   HPDF_BOOL            force);
+                   HPDF_BOOL            force,
+                   HPDF_BOOL            use_bbox);
 
 static HPDF_STATUS
 InternalArc  (HPDF_Page    page,
@@ -2686,7 +2687,7 @@ HPDF_Page_TextRect  (HPDF_Page            page,
                      HPDF_UINT           *len
                      )
 {
-    return InternalTextRect(page, left, top, right, bottom, text, align, len, HPDF_FALSE);
+    return InternalTextRect(page, left, top, right, bottom, text, align, len, HPDF_FALSE, HPDF_TRUE);
 }
 
 static HPDF_STATUS
@@ -2698,7 +2699,8 @@ InternalTextRect  (HPDF_Page            page,
                    const char          *text,
                    HPDF_TextAlignment   align,
                    HPDF_UINT           *len,
-                   HPDF_BOOL            force)
+                   HPDF_BOOL            force,
+                   HPDF_BOOL            use_bbox)
 {
     HPDF_STATUS ret = HPDF_Page_CheckState (page, HPDF_GMODE_TEXT_OBJECT);
     HPDF_PageAttr attr;
@@ -2722,8 +2724,6 @@ InternalTextRect  (HPDF_Page            page,
         return HPDF_RaiseError (page->error, HPDF_PAGE_FONT_NOT_FOUND, 0);
     }
 
-    bbox = HPDF_Font_GetBBox (attr->gstate->font);
-
     if (len)
         *len = 0;
     num_rest = HPDF_StrLen (text, HPDF_LIMIT_MAX_STRING_LEN + 1);
@@ -2733,13 +2733,26 @@ InternalTextRect  (HPDF_Page            page,
     } else if (!num_rest)
         return HPDF_OK;
 
-    if (attr->gstate->text_leading == 0)
-        HPDF_Page_SetTextLeading (page, (bbox.top - bbox.bottom) / 1000 *
-                attr->gstate->font_size);
+    if (use_bbox) {
+        bbox = HPDF_Font_GetBBox (attr->gstate->font);
 
-    top = top - bbox.top / 1000 * attr->gstate->font_size +
-                attr->gstate->text_leading;
-    bottom = bottom - bbox.bottom / 1000 * attr->gstate->font_size;
+        if (attr->gstate->text_leading == 0)
+            HPDF_Page_SetTextLeading (page, (bbox.top - bbox.bottom) / 1000 *
+                    attr->gstate->font_size);
+
+        top = top - bbox.top / 1000 * attr->gstate->font_size +
+                    attr->gstate->text_leading;
+        bottom = bottom - bbox.bottom / 1000 * attr->gstate->font_size;
+    } else {
+        HPDF_REAL ascent = (HPDF_REAL)HPDF_Font_GetAscent (attr->gstate->font) / 1000.0 * attr->gstate->font_size;
+        HPDF_REAL descent = (HPDF_REAL)HPDF_Font_GetDescent (attr->gstate->font) / 1000.0 * attr->gstate->font_size;
+
+        if (attr->gstate->text_leading == 0)
+            HPDF_Page_SetTextLeading (page, ascent - descent);
+
+        top = top - ascent + attr->gstate->text_leading;
+        bottom = bottom - descent;
+    }
 
     if (align == HPDF_TALIGN_JUSTIFY) {
         save_char_space = attr->gstate->char_space;
@@ -3270,23 +3283,12 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Dict_Add (textField, "T", textFieldName);
 
     /* V */
-    char *tmp = (char *)HPDF_GetMem( page->mmgr, max_len + 1 );
-    if ( !tmp ) {
-        HPDF_CheckError( page->error );
-        return NULL;
-    }
-    HPDF_StrCpy (tmp, value, tmp + max_len);
-    tmp[max_len] = '\0';
-
-    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, tmp, encoder);
+    HPDF_String textFieldValue = HPDF_String_New (page->mmgr, value, encoder);
     if (!textFieldValue) {
         HPDF_CheckError (page->error);
         return NULL;
     }
-
-    HPDF_FreeMem (page->mmgr, tmp);
     ret += HPDF_Dict_Add (textField, "V", textFieldValue);
-
 
     /* BS */
     if (border_width > 0) {
@@ -3352,7 +3354,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
             return NULL;
         }
 
-         /* BC */
+        /* BC */
         if (border_width > 0) {
             HPDF_Array bcArray = HPDF_Array_New (page->mmgr);
             if (!bcArray) {
@@ -3362,7 +3364,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
             ret += HPDF_Array_AddNumber (bcArray, 0);
             ret += HPDF_Dict_Add (mk, "BC", bcArray);
         }
-        
+
         /* R */
         if (rotation && rotation != 0 && (rotation % 90) == 0) {
             ret += HPDF_Dict_AddNumber (mk, "R", rotation);
@@ -3460,30 +3462,35 @@ HPDF_Page_TextField  (HPDF_Page      page,
 
     /* Border Width */
     if (border_width > 0) {
-        ret += HPDF_Page_GSave(fake_page);
-        ret += HPDF_Page_SetGrayStroke(fake_page, 0);
-        ret += HPDF_Page_SetLineWidth(fake_page, border_width);
-        ret += HPDF_Page_Rectangle(fake_page, border_width / 2.0, border_width / 2.0,
-            field_width - border_width, field_height - border_width);
-            ret += HPDF_Page_ClosePathStroke(fake_page);
-            
-            if ( flag & HPDF_FIELD_COMB && max_len > 1 ) {
-                HPDF_REAL usable_width = field_width - 2.0 * border_width;
-                HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
-                for ( HPDF_UINT i = 1; i < max_len; i++ ) {
-                    ret += HPDF_Page_MoveTo( fake_page, cell_width * (HPDF_REAL)i + border_width, border_width / 2.0 );
-                    ret += HPDF_Page_LineTo( fake_page, cell_width * (HPDF_REAL)i + border_width, field_height - border_width / 2.0 );
-                }
-                
-                ret += HPDF_Page_ClosePathStroke( fake_page );
+        ret += HPDF_Page_GSave (fake_page);
+        ret += HPDF_Page_SetGrayStroke (fake_page, 0);
+        ret += HPDF_Page_SetLineWidth (fake_page, border_width);
+        ret += HPDF_Page_Rectangle (fake_page, border_width / 2.0, border_width / 2.0, field_width - border_width, field_height - border_width);
+        ret += HPDF_Page_Stroke (fake_page);
+
+        if (flag & HPDF_FIELD_COMB && max_len > 1) {
+            HPDF_REAL usable_width = field_width - 2.0 * border_width;
+            HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
+            for (HPDF_UINT i = 1; i < max_len; i++) {
+                ret += HPDF_Page_MoveTo (fake_page, cell_width * (HPDF_REAL)i + border_width, border_width / 2.0);
+                ret += HPDF_Page_LineTo (fake_page, cell_width * (HPDF_REAL)i + border_width, field_height - border_width / 2.0);
             }
-            
-            ret += HPDF_Page_GRestore( fake_page );
+
+            ret += HPDF_Page_Stroke (fake_page);
         }
-        
+
+        ret += HPDF_Page_GRestore (fake_page);
+    }
+
     ret += HPDF_Stream_WriteStr (ap_stream->stream, "/Tx BMC\n");
-    
-    ret += HPDF_Page_BeginText(fake_page);
+
+    /* Clip */
+    ret += HPDF_Page_GSave (fake_page);
+    ret += HPDF_Page_Rectangle (fake_page, border_width, border_width, field_width - 2.0 * border_width, field_height - 2.0 * border_width);
+    ret += HPDF_Page_Clip (fake_page);
+    ret += HPDF_Page_EndPath (fake_page);
+
+    ret += HPDF_Page_BeginText (fake_page);
 
     HPDF_MemSet (buf, 0, HPDF_TMP_BUF_SIZ);
     pbuf = InternalWriteColorToBuf (buf, eptr, color, HPDF_TRUE);
@@ -3493,7 +3500,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Page_SetFontAndSize(fake_page, font, font_size);
 
     HPDF_REAL padding;
-    if ( border_width > 0 ) {
+    if (border_width > 0) {
         padding = border_width * 2.0;
     } else {
         padding = 2.0;
@@ -3513,72 +3520,100 @@ HPDF_Page_TextField  (HPDF_Page      page,
                 break;
         }
 
-        HPDF_Box bbox = HPDF_Font_GetBBox (font);
-        HPDF_REAL text_lead = font_size + ((HPDF_REAL)HPDF_Font_GetDescent(font) / -1000.0 * font_size);
-        HPDF_REAL y_offset;
-        if (field_height < text_lead) {
-            y_offset = (bbox.top - bbox.bottom) / 1000.0*font_size + 1.0;
-        } else {
-            y_offset = field_height - (HPDF_REAL)HPDF_Font_GetDescent(font) / -1000.0 * font_size - padding;
-        }
-        ret += InternalTextRect(fake_page, padding, y_offset, field_width - padding, 0, encoded_text, talign, NULL, HPDF_TRUE);
-    } else if (flag & HPDF_FIELD_COMB && max_len > 0) {
-        HPDF_REAL ascent  = (HPDF_REAL)HPDF_Font_GetAscent( font )  / 1000.0 * font_size;
-        HPDF_REAL descent = (HPDF_REAL)HPDF_Font_GetDescent( font ) / 1000.0 * font_size;
-        HPDF_REAL text_h  = ascent - descent;
-
-        HPDF_REAL usable_height = field_height - 2.0 * border_width;
-
-        HPDF_REAL y_offset = border_width + ( usable_height - text_h ) / 2.0 - descent;
-
-        HPDF_REAL usable_width = field_width - 2.0 * border_width;
-        HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
-
-        HPDF_UINT text_len = (HPDF_UINT)HPDF_StrLen( encoded_text, max_len );
-
-        HPDF_INT start_cell = 0;
-        if (alignment == 1) {
-            start_cell = (HPDF_INT)(( max_len - text_len ) / 2);
-        } else if (alignment == 2) {
-            start_cell = (HPDF_INT)( max_len - text_len );
-        }
-        
-        char ch[ 2 ];
-        ch[ 1 ] = '\0';
-
-        for ( HPDF_UINT i = 0; i < text_len; i++ ) {
-            HPDF_INT cell_index = start_cell + (HPDF_INT)i;
-            HPDF_REAL start_x = cell_width * (HPDF_REAL)cell_index + border_width;
-            ch[ 0 ] = encoded_text[ i ];
-            HPDF_REAL text_width = HPDF_Page_TextWidth( fake_page, ch );
-            
-            HPDF_REAL x_offset = start_x + ( cell_width - text_width ) / 2.0;
-
-            ret += HPDF_Page_SetTextMatrix( fake_page, 1, 0, 0, 1, x_offset, y_offset );
-            ret += HPDF_Page_ShowText( fake_page, ch );
-        }
+        HPDF_REAL y_offset = field_height - padding / 2.0;
+        ret += InternalTextRect (fake_page, padding, y_offset, field_width - padding, 0, encoded_text, talign, NULL, HPDF_TRUE, HPDF_FALSE);
     } else {
-        HPDF_REAL x_offset = padding;
-        if (alignment != 0) {
-            HPDF_REAL text_width = HPDF_Page_TextWidth(fake_page, encoded_text);
-            if (text_width < field_width - padding*2.0) {
+        HPDF_REAL ascent = (HPDF_REAL)HPDF_Font_GetAscent (font) / 1000.0 * font_size;
+        HPDF_REAL descent = (HPDF_REAL)HPDF_Font_GetDescent (font) / 1000.0 * font_size;
+        HPDF_REAL text_h = ascent - descent;
+
+        HPDF_REAL y_offset = (field_height - text_h) / 2.0 - descent;
+
+        if (flag & HPDF_FIELD_COMB && max_len > 0) {
+            /* comb text field */
+            if (border_width > 0) {
+                padding = border_width;
+            } else {
+                padding = 1.0;
+            }
+
+            HPDF_REAL cell_width = (field_width - 2.0 * padding) / (HPDF_REAL)max_len;
+
+            HPDF_UINT text_len = HPDF_StrLen (encoded_text, HPDF_LIMIT_MAX_STRING_LEN + 1);
+            if (text_len > HPDF_LIMIT_MAX_STRING_LEN) {
+                HPDF_RaiseError (page->error, HPDF_STRING_OUT_OF_RANGE, 0);
+                return NULL;
+            }
+
+            /* evaluate glyph count */
+            HPDF_Encoder encoder = ((HPDF_FontAttr)font->attr)->encoder;
+            HPDF_ParseText_Rec state;
+            HPDF_Encoder_SetParseText (encoder, &state, (HPDF_BYTE *)encoded_text, text_len);
+            HPDF_UINT glyph_cnt = 0;
+            for (HPDF_UINT i = 0; i < text_len; i++) {
+                HPDF_ByteType btype = HPDF_Encoder_ByteType (encoder, &state);
+                if (btype != HPDF_BYTE_TYPE_TRIAL)
+                    glyph_cnt++;
+            }
+
+            HPDF_UINT start_cell = 0;
+            if (glyph_cnt < max_len) {
                 if (alignment == 1) {
-                    x_offset = (field_width - text_width) / 2.0;
+                    start_cell = (max_len - glyph_cnt) / 2;
                 } else if (alignment == 2) {
-                    x_offset = field_width - text_width - padding;
+                    start_cell = max_len - glyph_cnt;
                 }
             }
-        }
 
-        HPDF_REAL y_offset;
-        if (field_height < font_size) {
-            y_offset = (HPDF_REAL)HPDF_Font_GetDescent(font) / -1000.0 * font_size + 1.0;
+            /* output glyphs */
+            const char *tmp_ptr = encoded_text;
+            HPDF_Encoder_SetParseText (encoder, &state, (HPDF_BYTE *)encoded_text, text_len);
+            HPDF_UINT glyph_index = 0;
+            HPDF_UINT glyph_len = 0;
+            for (HPDF_UINT i = 0; i < text_len; i++) {
+                glyph_len++;
+                HPDF_ByteType btype = HPDF_Encoder_ByteType (encoder, &state);
+                if (btype != HPDF_BYTE_TYPE_TRIAL) {
+                    if (glyph_len > 8) {
+                        HPDF_RaiseError (page->error, HPDF_INVALID_PARAMETER, 0);
+                        return NULL;
+                    }
+                    char glyph_buf[8];
+                    HPDF_MemCpy (glyph_buf, tmp_ptr, glyph_len);
+                    glyph_buf[glyph_len] = '\0';
+                    tmp_ptr += glyph_len;
+                    glyph_len = 0;
+
+                    HPDF_REAL text_width = HPDF_Page_TextWidth (fake_page, glyph_buf);
+
+                    HPDF_UINT cell_index = start_cell + glyph_index;
+                    HPDF_REAL start_x = cell_width * (HPDF_REAL)cell_index + padding;
+                    HPDF_REAL x_offset = start_x + (cell_width - text_width) / 2.0;
+                    ret += HPDF_Page_TextOut (fake_page, x_offset, y_offset, glyph_buf);
+
+                    glyph_index++;
+                }
+            }
         } else {
-            y_offset = field_height/2.0 - font_size/2.0 + 0.129*font_size;
+            /* normal text field */
+            HPDF_REAL usable_width = field_width - 2.0 * padding;
+            HPDF_REAL x_offset = padding;
+            if (alignment != 0) {
+                HPDF_REAL text_width = HPDF_Page_TextWidth (fake_page, encoded_text);
+                if (text_width < usable_width) {
+                    if (alignment == 1) {
+                        x_offset = (field_width - text_width) / 2.0;
+                    } else if (alignment == 2) {
+                        x_offset = field_width - text_width - padding;
+                    }
+                }
+            }
+
+            ret += HPDF_Page_TextOut (fake_page, x_offset, y_offset, encoded_text);
         }
-        ret += HPDF_Page_TextOut(fake_page, x_offset, y_offset, encoded_text);
     }
-    ret += HPDF_Page_EndText(fake_page);
+    ret += HPDF_Page_EndText (fake_page);
+    ret += HPDF_Page_GRestore (fake_page);
     ret += HPDF_Stream_WriteStr (ap_stream->stream, "EMC\012");
 
     ret += HPDF_Page_CreateFieldAnnotation (page, textField);
