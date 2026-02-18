@@ -4285,7 +4285,7 @@ InternalDrawCircle  (char       *pbuf,
 {
     // Inner drawable area
     HPDF_REAL padding = border_width;
-    if (padding < 1) padding = 1;
+    if (padding < 1.0f) padding = 1.0f;
     HPDF_REAL circle_dia = field_width < field_height ? field_width : field_height;
     HPDF_REAL usable_dia = circle_dia - 2.0f * padding;
     if (usable_dia < 0.0f) usable_dia = 0.0f;
@@ -4309,10 +4309,10 @@ InternalDrawCircle  (char       *pbuf,
     pbuf = HPDF_FToA (pbuf, circle_y_offset, eptr);
     pbuf = (char *)HPDF_StrCpy (pbuf, " m\012", eptr);
 
-    pbuf = QuarterCircleA(pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
-    pbuf = QuarterCircleB(pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
-    pbuf = QuarterCircleC(pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
-    pbuf = QuarterCircleD(pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
+    pbuf = QuarterCircleA (pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
+    pbuf = QuarterCircleB (pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
+    pbuf = QuarterCircleC (pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
+    pbuf = QuarterCircleD (pbuf, eptr, circle_x_offset, circle_y_offset, dot_ray);
     pbuf = (char *)HPDF_StrCpy (pbuf, "f\012Q\012", eptr);
 
     return pbuf;
