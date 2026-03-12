@@ -264,8 +264,11 @@ HPDF_StructureElement_AddChild  (HPDF_StructureElement parent,
 
     HPDF_PTRACE((" HPDF_StructureElement_AddChild\n"));
 
-    if (HPDF_Dict_GetItem (child, "P", HPDF_OCLASS_DICT))
-        return HPDF_SetError (parent->error, HPDF_STRUCTURE_ELEMENT_CANNOT_SET_PARENT, 0);
+    if (HPDF_Dict_GetItem (child, "P", HPDF_OCLASS_DICT)) {
+        HPDF_StructureElement old_parent = (HPDF_StructureElement)HPDF_Dict_GetItem (child, "P", HPDF_OCLASS_DICT);
+        if ((ret = HPDF_StructureElement_RemoveChild (old_parent, child)) != HPDF_OK)
+            return ret;
+    }
 
     if ((ret = HPDF_Dict_Add (child, "P", parent)) != HPDF_OK)
         return ret;
@@ -284,6 +287,20 @@ HPDF_StructureElement_AddChild  (HPDF_StructureElement parent,
 }
 
 HPDF_STATUS
+HPDF_StructureElement_RemoveChild  (HPDF_StructureElement parent,
+                                    HPDF_StructureElement child)
+{
+    HPDF_PTRACE((" HPDF_StructureElement_RemoveChild\n"));
+
+    HPDF_Array children = (HPDF_Array)HPDF_Dict_GetItem (parent, "K", HPDF_OCLASS_ARRAY);
+    if (!children) {
+        return HPDF_OK;
+    }
+
+    return HPDF_Array_Remove (children, child);
+}
+
+HPDF_STATUS
 HPDF_StructureElement_AddMarkedContentSequence  (HPDF_StructureElement structure_element,
                                                  HPDF_UINT             mcid,
                                                  HPDF_Page             page)
@@ -292,7 +309,7 @@ HPDF_StructureElement_AddMarkedContentSequence  (HPDF_StructureElement structure
     HPDF_Dict pg;
     HPDF_STATUS ret;
 
-    HPDF_PTRACE((" HPDF_StructureElement_AddChild\n"));
+    HPDF_PTRACE((" HPDF_StructureElement_AddMarkedContentSequence\n"));
 
     pg = (HPDF_Dict)HPDF_Dict_GetItem (structure_element, "Pg", HPDF_OCLASS_DICT);
     if (!pg) {
@@ -343,7 +360,7 @@ HPDF_StructureElement_AddObjectReference (HPDF_StructureElement structure_elemen
     HPDF_Array children;
     HPDF_STATUS ret;
 
-    HPDF_PTRACE((" HPDF_StructureElement_SetObjectReference\n"));
+    HPDF_PTRACE((" HPDF_StructureElement_AddObjectReference\n"));
 
     HPDF_Dict objr = HPDF_Dict_New (structure_element->mmgr);
     if (!objr)
