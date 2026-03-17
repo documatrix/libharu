@@ -44,6 +44,10 @@ HPDF_StructureElement_AddChild  (HPDF_StructureElement parent,
                                  HPDF_StructureElement child);
 
 HPDF_STATUS
+HPDF_StructureElement_RemoveChild  (HPDF_StructureElement parent,
+                                    HPDF_StructureElement child);
+
+HPDF_STATUS
 HPDF_StructureElement_AddMarkedContentSequence  (HPDF_StructureElement structure_element,
                                                  HPDF_UINT             mcid,
                                                  HPDF_Page             page);

@@ -366,6 +366,11 @@ HPDF_Array_Add  (HPDF_Array  array,
 
 
 HPDF_STATUS
+HPDF_Array_Remove  (HPDF_Array  array,
+                    void        *obj);
+
+
+HPDF_STATUS
 HPDF_Array_Insert  (HPDF_Array  array,
                     void        *target,
                     void        *obj);

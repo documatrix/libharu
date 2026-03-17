@@ -225,6 +225,34 @@ HPDF_Array_Add  (HPDF_Array  array,
     return ret;
 }
 
+HPDF_STATUS
+HPDF_Array_Remove  (HPDF_Array  array,
+                    void        *target)
+{
+    HPDF_UINT i;
+
+    for (i = 0; i < array->list->count; i++) {
+        void *ptr = HPDF_List_ItemAt (array->list, i);
+        void *obj_ptr;
+
+        HPDF_Obj_Header *header = (HPDF_Obj_Header *)ptr;
+        if (header->obj_class == HPDF_OCLASS_PROXY)
+            obj_ptr = ((HPDF_Proxy)ptr)->obj;
+        else
+            obj_ptr = ptr;
+
+        if (obj_ptr == target) {
+            HPDF_List_RemoveByIndex (array->list, i);
+
+            if (header->obj_class == HPDF_OCLASS_PROXY)
+                HPDF_Obj_Free (array->mmgr, ptr);
+
+            return HPDF_OK;
+        }
+    }
+
+    return HPDF_ITEM_NOT_FOUND;
+}
 
 HPDF_UINT
 HPDF_Array_Items  (HPDF_Array array)
