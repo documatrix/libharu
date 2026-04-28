@@ -298,6 +298,7 @@ EXPORTS
  HPDF_StructureElement_SetActualText@12     = HPDF_StructureElement_SetActualText
  HPDF_StructureElement_SetBBox@8            = HPDF_StructureElement_SetBBox
  HPDF_StructureElement_SetPlacement@8       = HPDF_StructureElement_SetPlacement
+ HPDF_StructureElement_AddChild@8           = HPDF_StructureElement_AddChild
  HPDF_StructureElement_AddObjectReference@24 = HPDF_StructureElement_AddObjectReference
  HPDF_TableHeaderCell_SetScope@8            = HPDF_TableHeaderCell_SetScope
  HPDF_Artifact_SetSubtype@8                 = HPDF_Artifact_SetSubtype

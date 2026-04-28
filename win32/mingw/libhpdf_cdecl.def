@@ -314,6 +314,7 @@ EXPORTS
     HPDF_CreateFigure
     HPDF_CreateFormula
     HPDF_CreateForm
+    HPDF_StructureElement_AddChild
     HPDF_StructureElement_SetAlternateText
     HPDF_StructureElement_SetActualText
     HPDF_StructureElement_SetBBox
