@@ -3480,7 +3480,9 @@ HPDF_Page_TextField  (HPDF_Page      page,
         if (flag & HPDF_FIELD_COMB && max_len > 1) {
             HPDF_REAL usable_width = field_width - 2.0 * border_width;
             HPDF_REAL cell_width = usable_width / (HPDF_REAL)max_len;
-            for (HPDF_UINT i = 1; i < max_len; i++) {
+            
+            HPDF_UINT i;
+            for (i = 1; i < max_len; i++) {
                 ret += HPDF_Page_MoveTo (fake_page, cell_width * (HPDF_REAL)i + border_width, border_width / 2.0);
                 ret += HPDF_Page_LineTo (fake_page, cell_width * (HPDF_REAL)i + border_width, field_height - border_width / 2.0);
             }
@@ -3559,7 +3561,9 @@ HPDF_Page_TextField  (HPDF_Page      page,
             HPDF_ParseText_Rec state;
             HPDF_Encoder_SetParseText (encoder, &state, (HPDF_BYTE *)encoded_text, text_len);
             HPDF_UINT glyph_cnt = 0;
-            for (HPDF_UINT i = 0; i < text_len; i++) {
+
+            HPDF_UINT i;
+            for (i = 0; i < text_len; i++) {
                 HPDF_ByteType btype = HPDF_Encoder_ByteType (encoder, &state);
                 if (btype != HPDF_BYTE_TYPE_TRIAL)
                     glyph_cnt++;
@@ -3579,7 +3583,9 @@ HPDF_Page_TextField  (HPDF_Page      page,
             HPDF_Encoder_SetParseText (encoder, &state, (HPDF_BYTE *)encoded_text, text_len);
             HPDF_UINT glyph_index = 0;
             HPDF_UINT glyph_len = 0;
-            for (HPDF_UINT i = 0; i < text_len; i++) {
+
+            HPDF_UINT j;
+            for (j = 0; j < text_len; j++) {
                 glyph_len++;
                 HPDF_ByteType btype = HPDF_Encoder_ByteType (encoder, &state);
                 if (btype != HPDF_BYTE_TYPE_TRIAL) {
