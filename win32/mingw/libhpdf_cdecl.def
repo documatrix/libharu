@@ -323,3 +323,4 @@ EXPORTS
     HPDF_Artifact_SetSubtype
     HPDF_MarkedContent_SetAlternateText
     HPDF_MarkedContent_SetActualText
+    HPDF_TextMarkupAnnot_SetQuadPoints
