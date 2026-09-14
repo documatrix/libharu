@@ -3234,7 +3234,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
                       HPDF_Encoder   encoder,
                       const char    *encoded_text,
                       HPDF_UINT      flag,
-                      HPDF_BOOL      print,
+                      HPDF_UINT      annotation,
                       HPDF_UINT      max_len,
                       HPDF_UINT      alignment,
                       HPDF_INT       rotation,
@@ -3261,11 +3261,8 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Dict_AddName (textField, "Type", "Annot");
     ret += HPDF_Dict_AddName (textField, "Subtype", "Widget");
 
-    if (print) {
-        ret += HPDF_Dict_AddNumber (textField, "F", 4);
-    } else {
-        ret += HPDF_Dict_AddNumber (textField, "F", 0);
-    }
+    /* F */
+    ret += HPDF_Dict_AddNumber (textField, "F", annotation);
 
     /* Rect */
     HPDF_Array rectArray = HPDF_Array_New (page->mmgr);
