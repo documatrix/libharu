@@ -3675,6 +3675,7 @@ HPDF_Page_SignatureField (HPDF_Page      page,
     ret += HPDF_Dict_AddName (signatureField, "Type", "Annot");
     ret += HPDF_Dict_AddName (signatureField, "Subtype", "Widget");
 
+    /* F */
     ret += HPDF_Dict_AddNumber (signatureField, "F", annotation);
 
     /* Rect */
@@ -3803,7 +3804,7 @@ HPDF_Page_CheckboxField  (HPDF_Page         page,
                           HPDF_REAL         right,
                           HPDF_REAL         bottom,
                           const char        *name,
-                          HPDF_BOOL         print,
+                          HPDF_UINT         annotation,
                           HPDF_INT          rotation,
                           HPDF_Color        color,
                           HPDF_BOOL         checked,
@@ -3828,11 +3829,8 @@ HPDF_Page_CheckboxField  (HPDF_Page         page,
     ret += HPDF_Dict_AddName (checkboxField, "Type", "Annot");
     ret += HPDF_Dict_AddName (checkboxField, "Subtype", "Widget");
 
-    if (print) {
-        ret += HPDF_Dict_AddNumber (checkboxField, "F", 4);
-    } else {
-        ret += HPDF_Dict_AddNumber (checkboxField, "F", 0);
-    }
+    /* F */
+    ret += HPDF_Dict_AddNumber (checkboxField, "F", annotation);
 
     /* Rect */
     HPDF_Array rectArray = HPDF_Array_New (page->mmgr);
