@@ -1848,7 +1848,7 @@ HPDF_Page_SignatureField (HPDF_Page      page,
                           HPDF_REAL      right,
                           HPDF_REAL      bottom,
                           const char     *name,
-                          HPDF_BOOL      print,
+                          HPDF_UINT      annotation,
                           HPDF_INT       rotation,
                           HPDF_UINT      flag);
 
