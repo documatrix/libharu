@@ -3234,7 +3234,7 @@ HPDF_Page_TextField  (HPDF_Page      page,
                       HPDF_Encoder   encoder,
                       const char    *encoded_text,
                       HPDF_UINT      flag,
-                      HPDF_BOOL      print,
+                      HPDF_UINT      annotation,
                       HPDF_UINT      max_len,
                       HPDF_UINT      alignment,
                       HPDF_INT       rotation,
@@ -3261,11 +3261,8 @@ HPDF_Page_TextField  (HPDF_Page      page,
     ret += HPDF_Dict_AddName (textField, "Type", "Annot");
     ret += HPDF_Dict_AddName (textField, "Subtype", "Widget");
 
-    if (print) {
-        ret += HPDF_Dict_AddNumber (textField, "F", 4);
-    } else {
-        ret += HPDF_Dict_AddNumber (textField, "F", 0);
-    }
+    /* F */
+    ret += HPDF_Dict_AddNumber (textField, "F", annotation);
 
     /* Rect */
     HPDF_Array rectArray = HPDF_Array_New (page->mmgr);
@@ -3657,7 +3654,7 @@ HPDF_Page_SignatureField (HPDF_Page      page,
                           HPDF_REAL      right,
                           HPDF_REAL      bottom,
                           const char     *name,
-                          HPDF_BOOL      print,
+                          HPDF_UINT      annotation,
                           HPDF_INT       rotation,
                           HPDF_UINT      flag)
 {
@@ -3678,11 +3675,8 @@ HPDF_Page_SignatureField (HPDF_Page      page,
     ret += HPDF_Dict_AddName (signatureField, "Type", "Annot");
     ret += HPDF_Dict_AddName (signatureField, "Subtype", "Widget");
 
-    if (print) {
-        ret += HPDF_Dict_AddNumber (signatureField, "F", 4);
-    } else {
-        ret += HPDF_Dict_AddNumber (signatureField, "F", 0);
-    }
+    /* F */
+    ret += HPDF_Dict_AddNumber (signatureField, "F", annotation);
 
     /* Rect */
     HPDF_Array rectArray = HPDF_Array_New (page->mmgr);
@@ -3810,7 +3804,7 @@ HPDF_Page_CheckboxField  (HPDF_Page         page,
                           HPDF_REAL         right,
                           HPDF_REAL         bottom,
                           const char        *name,
-                          HPDF_BOOL         print,
+                          HPDF_UINT         annotation,
                           HPDF_INT          rotation,
                           HPDF_Color        color,
                           HPDF_BOOL         checked,
@@ -3835,11 +3829,8 @@ HPDF_Page_CheckboxField  (HPDF_Page         page,
     ret += HPDF_Dict_AddName (checkboxField, "Type", "Annot");
     ret += HPDF_Dict_AddName (checkboxField, "Subtype", "Widget");
 
-    if (print) {
-        ret += HPDF_Dict_AddNumber (checkboxField, "F", 4);
-    } else {
-        ret += HPDF_Dict_AddNumber (checkboxField, "F", 0);
-    }
+    /* F */
+    ret += HPDF_Dict_AddNumber (checkboxField, "F", annotation);
 
     /* Rect */
     HPDF_Array rectArray = HPDF_Array_New (page->mmgr);
@@ -4451,7 +4442,7 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
                              HPDF_REAL              bottom,
                              const char            *value,
                              HPDF_Encoder           encoder,
-                             HPDF_BOOL              print,
+                             HPDF_UINT              annotation,
                              HPDF_INT               rotation,
                              HPDF_Color             color,
                              HPDF_BOOL              selected,
@@ -4493,11 +4484,8 @@ HPDF_Page_RadioButtonField  (HPDF_Page              page,
     ret += HPDF_Dict_AddName (annot, "Type", "Annot");
     ret += HPDF_Dict_AddName (annot, "Subtype", "Widget");
 
-    if (print) {
-        ret += HPDF_Dict_AddNumber (annot, "F", 4);
-    } else {
-        ret += HPDF_Dict_AddNumber (annot, "F", 0);
-    }
+    /* F */
+    ret += HPDF_Dict_AddNumber (annot, "F", annotation);
 
     /* BS */
     if (border_width > 0) {
