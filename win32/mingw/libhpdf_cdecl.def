@@ -200,6 +200,7 @@ EXPORTS
     HPDF_SetEncryptionMode
     HPDF_SetErrorHandler
     HPDF_SetInfoAttr
+    HPDF_SetInfoAttr_Unicode
     HPDF_SetInfoDateAttr
     HPDF_SetOpenAction
     HPDF_SetPageLayout

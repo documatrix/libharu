@@ -929,6 +929,13 @@ HPDF_SetInfoAttr (HPDF_Doc        pdf,
                   const char     *value);
 
 
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetInfoAttr_Unicode (HPDF_Doc        pdf,
+                          HPDF_InfoType   type,
+                          const char     *value,
+                          HPDF_UINT16     unicode_len);
+
+
 HPDF_EXPORT(const char*)
 HPDF_GetInfoAttr (HPDF_Doc        pdf,
                   HPDF_InfoType   type);

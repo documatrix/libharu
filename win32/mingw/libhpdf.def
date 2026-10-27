@@ -218,6 +218,7 @@ EXPORTS
  HPDF_SetEncryptionMode@12           = HPDF_SetEncryptionMode
  HPDF_SetErrorHandler@8              = HPDF_SetErrorHandler
  HPDF_SetInfoAttr@12                 = HPDF_SetInfoAttr
+ HPDF_SetInfoAttr_Unicode@16         = HPDF_SetInfoAttr_Unicode
  HPDF_SetInfoDateAttr@44             = HPDF_SetInfoDateAttr
  HPDF_SetOpenAction@8                = HPDF_SetOpenAction
  HPDF_SetPageLayout@8                = HPDF_SetPageLayout

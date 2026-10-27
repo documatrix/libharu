@@ -2229,6 +2229,28 @@ HPDF_SetInfoAttr  (HPDF_Doc          pdf,
 }
 
 
+HPDF_EXPORT(HPDF_STATUS)
+HPDF_SetInfoAttr_Unicode  (HPDF_Doc          pdf,
+                           HPDF_InfoType     type,
+                           const char  *value,
+                           HPDF_UINT16       unicode_len)
+{
+    HPDF_STATUS ret;
+    HPDF_Dict info = GetInfo (pdf);
+
+    HPDF_PTRACE((" HPDF_SetInfoAttr_Unicode\n"));
+
+    if (!info)
+        return HPDF_CheckError (&pdf->error);
+
+    ret = HPDF_Info_SetInfoAttr_Unicode (info, type, value, unicode_len);
+    if (ret != HPDF_OK)
+        return HPDF_CheckError (&pdf->error);
+
+    return ret;
+}
+
+
 HPDF_EXPORT(const char*)
 HPDF_GetInfoAttr  (HPDF_Doc        pdf,
                    HPDF_InfoType   type)

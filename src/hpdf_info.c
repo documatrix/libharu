@@ -70,6 +70,24 @@ HPDF_Info_SetInfoAttr (HPDF_Dict        info,
 }
 
 
+HPDF_STATUS
+HPDF_Info_SetInfoAttr_Unicode (HPDF_Dict        info,
+                               HPDF_InfoType    type,
+                               const char  *value,
+                               HPDF_UINT16      unicode_len)
+{
+    const char* name = InfoTypeToName (type);
+
+    HPDF_PTRACE((" HPDF_Info_SetInfoAttr_Unicode\n"));
+
+    if (type <= HPDF_INFO_MOD_DATE || type == HPDF_INFO_TRAPPED)
+        return HPDF_SetError (info->error, HPDF_INVALID_PARAMETER, 0);
+
+    return HPDF_Dict_Add (info, name, HPDF_String_New_Unicode (info->mmgr,
+            value, unicode_len));
+}
+
+
 const char*
 HPDF_Info_GetInfoAttr (HPDF_Dict      info,
                        HPDF_InfoType  type)

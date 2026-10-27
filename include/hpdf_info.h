@@ -33,6 +33,13 @@ HPDF_Info_SetInfoAttr (HPDF_Dict        info,
                        HPDF_Encoder     encoder);
 
 
+HPDF_STATUS
+HPDF_Info_SetInfoAttr_Unicode (HPDF_Dict        info,
+                               HPDF_InfoType    type,
+                               const char  *value,
+                               HPDF_UINT16      unicode_len);
+
+
 const char*
 HPDF_Info_GetInfoAttr (HPDF_Dict      info,
                        HPDF_InfoType  type);
